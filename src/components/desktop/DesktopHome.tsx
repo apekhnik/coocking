@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Icons } from '@/components/Icon'
+import FoodImg from '@/components/FoodImg'
 import { DesktopFeature, DesktopRecipeWide, DesktopCard } from './DesktopCard'
+import { toggleFavorite } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
 const FILTERS = ['All', 'Quick', 'Vegetarian', 'Sweet', 'Sunday'] as const
@@ -15,6 +17,7 @@ interface Props {
 export default function DesktopHome({ recipes }: Props) {
   const [filter, setFilter] = useState<string>('All')
   const [q, setQ] = useState('')
+  const [view, setView] = useState<'grid' | 'rows'>('grid')
 
   const filtered = recipes.filter((r) => {
     if (filter === 'Quick' && r.cookTime > 30) return false
@@ -111,34 +114,84 @@ export default function DesktopHome({ recipes }: Props) {
 
       {/* Recipe grid */}
       <div style={{ padding: '18px 36px 60px' }}>
-        <div className="flex items-baseline justify-between mb-[18px]">
+        <div className="flex items-center justify-between mb-[18px]">
           <h2 className="font-serif m-0 text-[28px] font-medium">From your cookbook</h2>
-          <div className="flex gap-1.5">
-            {FILTERS.map((f) => {
-              const on = filter === f
-              return (
-                <button key={f} onClick={() => setFilter(f)}
-                  className="h-8 px-3.5 rounded-full text-[12.5px] font-semibold"
-                  style={{
-                    background: on ? 'var(--ink)' : 'transparent',
-                    color: on ? 'var(--surface)' : 'var(--ink-2)',
-                    border: on ? 'none' : '1px solid var(--rule-2)',
-                  }}>
-                  {f}
-                </button>
-              )
-            })}
+          <div className="flex items-center gap-2.5">
+            <div className="flex gap-1.5">
+              {FILTERS.map((f) => {
+                const on = filter === f
+                return (
+                  <button key={f} onClick={() => setFilter(f)}
+                    className="h-8 px-3.5 rounded-full text-[12.5px] font-semibold"
+                    style={{
+                      background: on ? 'var(--ink)' : 'transparent',
+                      color: on ? 'var(--surface)' : 'var(--ink-2)',
+                      border: on ? 'none' : '1px solid var(--rule-2)',
+                    }}>
+                    {f}
+                  </button>
+                )
+              })}
+            </div>
+            <div className="flex rounded-[10px] overflow-hidden" style={{ border: '1px solid var(--rule-2)' }}>
+              <button
+                onClick={() => setView('grid')}
+                className="w-8 h-8 flex items-center justify-center"
+                style={{ background: view === 'grid' ? 'var(--ink)' : 'transparent', color: view === 'grid' ? 'var(--surface)' : 'var(--ink-muted)' }}
+              >
+                <Icons.grid />
+              </button>
+              <button
+                onClick={() => setView('rows')}
+                className="w-8 h-8 flex items-center justify-center"
+                style={{ background: view === 'rows' ? 'var(--ink)' : 'transparent', color: view === 'rows' ? 'var(--surface)' : 'var(--ink-muted)', borderLeft: '1px solid var(--rule-2)' }}
+              >
+                <Icons.rows />
+              </button>
+            </div>
           </div>
         </div>
 
         {grid.length === 0 && filtered.length > 0 && (
           <p className="text-[14px]" style={{ color: 'var(--ink-soft)' }}>No more recipes in this filter.</p>
         )}
-        <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
-          {grid.map((r) => (
-            <DesktopCard key={r.id} recipe={r} />
-          ))}
-        </div>
+
+        {view === 'grid' ? (
+          <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+            {grid.map((r) => (
+              <DesktopCard key={r.id} recipe={r} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {grid.map((r) => (
+              <Link key={r.id} href={`/recipes/${r.id}`}
+                className="flex gap-4 rounded-[14px] p-3 items-center group no-underline transition-colors"
+                style={{ background: 'var(--surface)' }}>
+                <div className="relative shrink-0 rounded-[10px] overflow-hidden" style={{ width: 72, height: 72 }}>
+                  <FoodImg src={r.imageUrl} tone={r.imageTone} fill />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-serif text-[18px] leading-[1.2] font-medium m-0" style={{ color: 'var(--ink)' }}>
+                    {r.title}
+                  </h4>
+                  <div className="mt-1 text-[12.5px] flex gap-2 items-center" style={{ color: 'var(--ink-soft)' }}>
+                    <span className="inline-flex items-center gap-1"><Icons.clock />{r.cookTime} min</span>
+                    <span>·</span>
+                    <span>{r.difficulty}</span>
+                    {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
+                  </div>
+                </div>
+                <button
+                  onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
+                  className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                  {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                </button>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   )
