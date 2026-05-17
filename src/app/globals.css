@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
+/* Design tokens — Mise cookbook */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #F0E9DC;
+  --surface: #F7F1E6;
+  --card: #FBF7EF;
+  --paper: #FFFFFF;
+  --ink: #1F1A14;
+  --ink-2: #3D352A;
+  --ink-muted: #6B6359;
+  --ink-soft: #9B9389;
+  --rule: rgba(31, 26, 20, 0.08);
+  --rule-2: rgba(31, 26, 20, 0.14);
+  --terracotta: #B8543F;
+  --terracotta-deep: #8E3D2C;
+  --olive: #5C6B3F;
+  --olive-soft: #7E8C58;
+  --honey: #D4A24C;
+  --plum: #6B3F4C;
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --shadow-card: 0 1px 2px rgba(31,26,20,0.04), 0 6px 22px rgba(31,26,20,0.06);
+  --shadow-lift: 0 2px 6px rgba(31,26,20,0.06), 0 18px 40px rgba(31,26,20,0.10);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-soft: var(--ink-soft);
+  --color-terracotta: var(--terracotta);
+  --color-olive: var(--olive);
+  --color-honey: var(--honey);
+  --color-plum: var(--plum);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Chip variants */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.chip.dark { background: rgba(31,26,20,0.55); color: #FBF7EF; backdrop-filter: blur(8px); }
+.chip.veg  { background: rgba(92,107,63,0.15); color: var(--olive); }
+.chip.quick { background: rgba(184,84,63,0.12); color: var(--terracotta); }
+.chip.plum  { background: rgba(107,63,76,0.12); color: var(--plum); }
+.chip.honey { background: rgba(212,162,76,0.18); color: #8a6520; }
+
+/* Hide scrollbar utility */
+.scroll::-webkit-scrollbar { display: none; }
+.scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Fade-in animation */
+@keyframes fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.fadein { animation: fadein 0.22s ease both; }

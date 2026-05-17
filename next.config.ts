@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  outputFileTracingRoot: require('path').join(__dirname),
+  images: {
+    remotePatterns: [
+      { hostname: 'images.unsplash.com' },
+    ],
+  },
+}
 
-export default nextConfig;
+export default nextConfig

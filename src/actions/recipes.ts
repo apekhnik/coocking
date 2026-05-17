@@ -1,0 +1,165 @@
+'use server'
+
+import { auth } from '@clerk/nextjs/server'
+import { db } from '@/db'
+import { recipes, ingredients, steps } from '@/db/schema'
+import type { NewRecipe } from '@/db/schema'
+import { eq, and } from 'drizzle-orm'
+import { revalidatePath } from 'next/cache'
+
+export type RecipeWithRelations = Awaited<ReturnType<typeof getRecipe>>
+
+export async function getRecipes(userId?: string) {
+  const { userId: authUserId } = await auth()
+  const uid = userId ?? authUserId
+  if (!uid) return []
+
+  return db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.userId, uid))
+    .orderBy(recipes.createdAt)
+}
+
+export async function getRecipe(id: string) {
+  const { userId } = await auth()
+  if (!userId) return null
+
+  const [recipe] = await db
+    .select()
+    .from(recipes)
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+    .limit(1)
+
+  if (!recipe) return null
+
+  const [recipeIngredients, recipeSteps] = await Promise.all([
+    db
+      .select()
+      .from(ingredients)
+      .where(eq(ingredients.recipeId, id))
+      .orderBy(ingredients.position),
+    db
+      .select()
+      .from(steps)
+      .where(eq(steps.recipeId, id))
+      .orderBy(steps.position),
+  ])
+
+  return { ...recipe, ingredients: recipeIngredients, steps: recipeSteps }
+}
+
+export async function createRecipe(data: {
+  recipe: Omit<NewRecipe, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+  ingredients: { qty: string; unit: string; item: string }[]
+  steps: { title: string; body: string }[]
+}) {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const [recipe] = await db
+    .insert(recipes)
+    .values({ ...data.recipe, userId })
+    .returning()
+
+  if (data.ingredients.length) {
+    await db.insert(ingredients).values(
+      data.ingredients.map((ing, position) => ({
+        recipeId: recipe.id,
+        ...ing,
+        position,
+      }))
+    )
+  }
+
+  if (data.steps.length) {
+    await db.insert(steps).values(
+      data.steps.map((step, position) => ({
+        recipeId: recipe.id,
+        ...step,
+        position,
+      }))
+    )
+  }
+
+  revalidatePath('/home')
+  return recipe
+}
+
+export async function updateRecipe(
+  id: string,
+  data: {
+    recipe: Partial<Omit<NewRecipe, 'id' | 'userId' | 'createdAt'>>
+    ingredients?: { qty: string; unit: string; item: string }[]
+    steps?: { title: string; body: string }[]
+  }
+) {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  await db
+    .update(recipes)
+    .set({ ...data.recipe, updatedAt: new Date() })
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
+  if (data.ingredients !== undefined) {
+    await db.delete(ingredients).where(eq(ingredients.recipeId, id))
+    if (data.ingredients.length) {
+      await db.insert(ingredients).values(
+        data.ingredients.map((ing, position) => ({
+          recipeId: id,
+          ...ing,
+          position,
+        }))
+      )
+    }
+  }
+
+  if (data.steps !== undefined) {
+    await db.delete(steps).where(eq(steps.recipeId, id))
+    if (data.steps.length) {
+      await db.insert(steps).values(
+        data.steps.map((step, position) => ({
+          recipeId: id,
+          ...step,
+          position,
+        }))
+      )
+    }
+  }
+
+  revalidatePath('/home')
+  revalidatePath(`/recipes/${id}`)
+}
+
+export async function deleteRecipe(id: string) {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  await db
+    .delete(recipes)
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
+  revalidatePath('/home')
+}
+
+export async function toggleFavorite(id: string) {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const [recipe] = await db
+    .select({ isFavorite: recipes.isFavorite })
+    .from(recipes)
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+    .limit(1)
+
+  if (!recipe) return
+
+  await db
+    .update(recipes)
+    .set({ isFavorite: !recipe.isFavorite, updatedAt: new Date() })
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
+  revalidatePath('/home')
+  revalidatePath(`/recipes/${id}`)
+}
