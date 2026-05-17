@@ -5,11 +5,11 @@ import { usePathname } from 'next/navigation'
 import { Icons } from './Icon'
 
 const items = [
-  { key: 'home',   href: '/home',     label: 'Home',     Icon: Icons.home },
-  { key: 'search', href: '/home',     label: 'Search',   Icon: Icons.search },
-  { key: 'add',    href: '/recipes/new', label: '',      Icon: Icons.plus },
-  { key: 'book',   href: '/home',     label: 'Cookbook', Icon: Icons.book },
-  { key: 'import', href: '/import',   label: 'Import',   Icon: Icons.upload },
+  { key: 'home',      href: '/home',        label: 'Home',      Icon: Icons.home },
+  { key: 'favorites', href: '/favorites',   label: 'Favorites', Icon: Icons.heart },
+  { key: 'add',       href: '/recipes/new', label: '',          Icon: Icons.plus },
+  { key: 'book',      href: '/home',        label: 'Cookbook',  Icon: Icons.book },
+  { key: 'import',    href: '/import',      label: 'Import',    Icon: Icons.upload },
 ] as const
 
 export default function BottomNav() {

@@ -5,10 +5,10 @@ import { usePathname } from 'next/navigation'
 import { Icons } from '@/components/Icon'
 
 const NAV = [
-  { key: 'home',      href: '/home',     label: 'Home',       Icon: Icons.home },
-  { key: 'search',    href: '/home',     label: 'Search',     Icon: Icons.search },
-  { key: 'favorites', href: '/home',     label: 'Favorites',  Icon: Icons.heart },
-  { key: 'cookbook',  href: '/home',     label: 'My Cookbook',Icon: Icons.book },
+  { key: 'home',      href: '/home',      label: 'Home',       Icon: Icons.home },
+  { key: 'search',    href: '/home',      label: 'Search',     Icon: Icons.search },
+  { key: 'favorites', href: '/favorites', label: 'Favorites',  Icon: Icons.heart },
+  { key: 'cookbook',  href: '/home',      label: 'My Cookbook',Icon: Icons.book },
 ] as const
 
 const COLLECTIONS = [
@@ -57,7 +57,7 @@ export default function DesktopSidebar() {
       {/* Nav */}
       <nav className="flex flex-col gap-0.5">
         {NAV.map(({ key, href, label, Icon }) => {
-          const active = key === 'home' ? pathname === href : false
+          const active = key === 'favorites' ? pathname.startsWith('/favorites') : key === 'home' ? pathname === '/home' : false
           return (
             <Link key={key} href={href}
               className="flex items-center gap-2.5 px-2.5 py-[9px] rounded-[10px] text-[13.5px] transition-all"

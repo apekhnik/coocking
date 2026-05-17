@@ -12,9 +12,10 @@ const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday']
 
 interface RecipeFeedProps {
   recipes: Recipe[]
+  title?: string
 }
 
-export default function RecipeFeed({ recipes }: RecipeFeedProps) {
+export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<string>('All')
   const [view, setView] = useState<'grid' | 'rows'>('grid')
@@ -44,7 +45,10 @@ export default function RecipeFeed({ recipes }: RecipeFeedProps) {
               Vol. 04 · Late Summer
             </div>
             <h1 className="font-serif mt-1 mb-0 text-[42px] leading-none font-medium tracking-tight">
-              Your <em className="italic" style={{ color: 'var(--terracotta)' }}>cookbook</em>
+              {title
+                ? <><em className="italic" style={{ color: 'var(--terracotta)' }}>{title}</em></>
+                : <>Your <em className="italic" style={{ color: 'var(--terracotta)' }}>cookbook</em></>
+              }
             </h1>
           </div>
           <button className="w-[42px] h-[42px] rounded-full flex items-center justify-center"

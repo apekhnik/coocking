@@ -12,9 +12,10 @@ const FILTERS = ['All', 'Quick', 'Vegetarian', 'Sweet', 'Sunday'] as const
 
 interface Props {
   recipes: Recipe[]
+  title?: string
 }
 
-export default function DesktopHome({ recipes }: Props) {
+export default function DesktopHome({ recipes, title }: Props) {
   const [filter, setFilter] = useState<string>('All')
   const [q, setQ] = useState('')
   const [view, setView] = useState<'grid' | 'rows'>('grid')
@@ -115,7 +116,7 @@ export default function DesktopHome({ recipes }: Props) {
       {/* Recipe grid */}
       <div style={{ padding: '18px 36px 60px' }}>
         <div className="flex items-center justify-between mb-[18px]">
-          <h2 className="font-serif m-0 text-[28px] font-medium">From your cookbook</h2>
+          <h2 className="font-serif m-0 text-[28px] font-medium">{title ?? 'From your cookbook'}</h2>
           <div className="flex items-center gap-2.5">
             <div className="flex gap-1.5">
               {FILTERS.map((f) => {

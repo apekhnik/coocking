@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mise — Recipe Cookbook</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    html, body { margin:0; padding:0; background:#f0eee9; height:100%; overflow:hidden; }
+    body { font-family: 'Manrope', system-ui, sans-serif; }
+  </style>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Starter components -->
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="browser-window.jsx"></script>
+
+  <!-- App components -->
+  <script type="text/babel" src="shared.jsx"></script>
+  <script type="text/babel" src="screen-home.jsx"></script>
+  <script type="text/babel" src="screen-detail.jsx"></script>
+  <script type="text/babel" src="screen-edit.jsx"></script>
+  <script type="text/babel" src="screen-import.jsx"></script>
+  <script type="text/babel" src="screen-desktop.jsx"></script>
+  <script type="text/babel" src="screen-components.jsx"></script>
+
+  <!-- App -->
+  <script type="text/babel" data-presets="react">
+    /* Each artboard is a self-contained mini-app so the user can click around inside it. */
+
+    function PhoneFrame({ children, dark = false }) {
+      return (
+        <IOSDevice width={390} height={844} dark={dark}>
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+            {children}
+          </div>
+        </IOSDevice>
+      );
+    }
+
+    /* — Mobile Home: navigates to Detail when a card is tapped — */
+    function HomeArtboard() {
+      const [view, setView] = React.useState({ name: 'home', recipe: null });
+      return (
+        <PhoneFrame>
+          {view.name === 'home' && (
+            <ScreenHome
+              navActive="home"
+              onOpenRecipe={(r) => setView({ name: 'detail', recipe: r })}
+              onNav={(k) => k === 'add' && setView({ name: 'edit' })}
+            />
+          )}
+          {view.name === 'detail' && (
+            <ScreenDetail
+              recipe={view.recipe}
+              onBack={() => setView({ name: 'home' })}
+              onEdit={() => setView({ name: 'edit' })}
+            />
+          )}
+          {view.name === 'edit' && (
+            <ScreenEdit
+              onBack={() => setView({ name: 'home' })}
+              onSave={() => setView({ name: 'home' })}
+            />
+          )}
+        </PhoneFrame>
+      );
+    }
+
+    /* — Detail-only artboard — */
+    function DetailArtboard() {
+      return (
+        <PhoneFrame>
+          <ScreenDetail recipe={FOOD[0]} onBack={() => {}} onEdit={() => {}} />
+        </PhoneFrame>
+      );
+    }
+
+    /* — Edit-only artboard — */
+    function EditArtboard() {
+      return (
+        <PhoneFrame>
+          <ScreenEdit onBack={() => {}} onSave={() => {}} />
+        </PhoneFrame>
+      );
+    }
+
+    /* — Import-only artboard — */
+    function ImportArtboard() {
+      return (
+        <PhoneFrame>
+          <ScreenImport onBack={() => {}} onImport={() => {}} />
+        </PhoneFrame>
+      );
+    }
+
+    /* — Desktop home — */
+    function DesktopArtboard() {
+      return (
+        <ChromeWindow
+          tabs={[{ title: 'Mise · Cookbook' }, { title: 'New Tab' }]}
+          activeIndex={0}
+          url="mise.cookbook/home"
+          width={1240}
+          height={760}
+        >
+          <div style={{ height: '100%' }}>
+            <ScreenDesktop />
+          </div>
+        </ChromeWindow>
+      );
+    }
+
+    function App() {
+      return (
+        <DesignCanvas>
+          <DCSection id="mobile-flow" title="Mobile · key screens" subtitle="A premium personal cookbook — light cream, terracotta, olive">
+            <DCArtboard id="home"    label="Home · feed"        width={390} height={844}><HomeArtboard /></DCArtboard>
+            <DCArtboard id="detail"  label="Recipe · detail"    width={390} height={844}><DetailArtboard /></DCArtboard>
+            <DCArtboard id="edit"    label="Add / edit"         width={390} height={844}><EditArtboard /></DCArtboard>
+            <DCArtboard id="import"  label="Import .docx"       width={390} height={844}><ImportArtboard /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="desktop" title="Desktop · responsive" subtitle="Same system, scaled to a sidebar + editorial grid">
+            <DCArtboard id="desktop-home" label="Home" width={1240} height={760}><DesktopArtboard /></DCArtboard>
+          </DCSection>
+
+          <DCSection id="system" title="Design system" subtitle="Tokens, type, and core components">
+            <DCArtboard id="components" label="Components & tokens" width={920} height={1280}><ScreenComponents /></DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
