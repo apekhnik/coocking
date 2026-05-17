@@ -13,6 +13,7 @@
   "dependencies": {
     "@clerk/nextjs": "^7.3.5",
     "@neondatabase/serverless": "^1.1.0",
+    "@vercel/blob": "^2.3.3",
     "docx": "^9.6.1",
     "drizzle-orm": "^0.45.2",
     "mammoth": "^1.12.0",

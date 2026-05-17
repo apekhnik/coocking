@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icons } from './Icon'
 import FoodImg from './FoodImg'
@@ -20,6 +20,8 @@ interface StepRow { title: string; body: string }
 export default function RecipeEditor({ recipe }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
 
   const [title, setTitle] = useState(recipe?.title ?? '')
   const [subtitle, setSubtitle] = useState(recipe?.subtitle ?? '')
@@ -31,6 +33,19 @@ export default function RecipeEditor({ recipe }: Props) {
   const [steps, setSteps] = useState<StepRow[]>(recipe?.steps.map((s) => ({ title: s.title, body: s.body })) ?? [{ title: '', body: '' }])
 
   const toggleTag = (t: string) => setTags((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t])
+
+  async function handleImageUpload(file: File) {
+    setUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: fd })
+      const { url } = await res.json()
+      setImageUrl(url)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSave = () => {
     startTransition(async () => {
@@ -70,22 +85,44 @@ export default function RecipeEditor({ recipe }: Props) {
       )}
 
       <div className="flex-1 overflow-y-auto pb-10 px-[22px] scroll">
-        {/* Image URL */}
+        {/* Image */}
         <div className="mb-4 mt-4">
-          <label className="text-[11px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: 'var(--ink-muted)' }}>Photo URL</label>
-          <div className="flex gap-2">
-            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..."
-              className="flex-1 h-10 px-3 rounded-[12px] text-[13px] outline-none"
-              style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink)' }} />
+          <label className="text-[11px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: 'var(--ink-muted)' }}>Photo</label>
+          <div className="flex gap-2 mb-2">
+            <label
+              className="h-10 px-3 rounded-[12px] text-[12px] font-semibold flex items-center gap-1.5 cursor-pointer shrink-0"
+              style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: uploading ? 'var(--ink-muted)' : 'var(--ink-2)' }}
+            >
+              <Icons.image />
+              {uploading ? 'Завантаження...' : 'З компʼютера'}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f) }}
+              />
+            </label>
             <button
               type="button"
               onClick={() => setImageUrl(`https://source.unsplash.com/800x500/?food,${encodeURIComponent(title || 'cooking')}`)}
               className="h-10 px-3 rounded-[12px] text-[12px] font-semibold flex items-center gap-1.5 shrink-0"
               style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink-2)' }}
             >
-              <Icons.image /> Random
+              🎲 Random
             </button>
+            {imageUrl && (
+              <button type="button" onClick={() => setImageUrl('')}
+                className="h-10 px-3 rounded-[12px] text-[12px] shrink-0"
+                style={{ color: 'var(--ink-muted)' }}>
+                <Icons.x />
+              </button>
+            )}
           </div>
+          <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="или вставьте URL..."
+            className="w-full h-10 px-3 rounded-[12px] text-[13px] outline-none"
+            style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink)' }} />
         </div>
 
         {/* Title */}
