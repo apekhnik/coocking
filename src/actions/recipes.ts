@@ -7,6 +7,7 @@ import type { NewRecipe } from '@/db/schema'
 import { eq, and, inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { parseDocxToRecipes } from '@/lib/docx-service'
+import { fetchFoodImageUrl } from '@/lib/image-service'
 
 export type RecipeWithRelations = Awaited<ReturnType<typeof getRecipe>>
 
@@ -144,6 +145,33 @@ export async function deleteRecipe(id: string) {
   revalidatePath('/home')
 }
 
+export async function populateRecipeImages(): Promise<{ updated: number }> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const all = await db
+    .select({ id: recipes.id, title: recipes.title, imageUrl: recipes.imageUrl })
+    .from(recipes)
+    .where(eq(recipes.userId, userId))
+
+  const missing = all.filter(r => !r.imageUrl)
+  let updated = 0
+
+  for (const r of missing) {
+    const imageUrl = await fetchFoodImageUrl(r.title)
+    if (imageUrl) {
+      await db
+        .update(recipes)
+        .set({ imageUrl })
+        .where(eq(recipes.id, r.id))
+      updated++
+    }
+  }
+
+  revalidatePath('/home')
+  return { updated }
+}
+
 export async function getRecipesWithRelations() {
   const { userId } = await auth()
   if (!userId) return []
@@ -198,9 +226,11 @@ export async function importRecipesFromDocx(
       continue
     }
 
+    const imageUrl = await fetchFoodImageUrl(item.title)
+
     const [recipe] = await db
       .insert(recipes)
-      .values({ title: item.title, userId })
+      .values({ title: item.title, userId, imageUrl })
       .returning()
 
     if (item.description && item.description !== '-') {

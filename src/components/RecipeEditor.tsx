@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icons } from './Icon'
+import FoodImg from './FoodImg'
 import { createRecipe, updateRecipe } from '@/actions/recipes'
 import type { RecipeWithRelations } from '@/actions/recipes'
 
@@ -22,6 +23,7 @@ export default function RecipeEditor({ recipe }: Props) {
 
   const [title, setTitle] = useState(recipe?.title ?? '')
   const [subtitle, setSubtitle] = useState(recipe?.subtitle ?? '')
+  const [imageUrl, setImageUrl] = useState(recipe?.imageUrl ?? '')
   const [cookTime, setCookTime] = useState(recipe?.cookTime ?? 30)
   const [difficulty, setDifficulty] = useState<typeof DIFFS[number]>((recipe?.difficulty as typeof DIFFS[number]) ?? 'Easy')
   const [tags, setTags] = useState<string[]>(recipe?.tags ?? [])
@@ -32,7 +34,7 @@ export default function RecipeEditor({ recipe }: Props) {
 
   const handleSave = () => {
     startTransition(async () => {
-      const data = { recipe: { title, subtitle, cookTime, difficulty, tags }, ingredients: ings.filter((i) => i.item), steps: steps.filter((s) => s.body) }
+      const data = { recipe: { title, subtitle, cookTime, difficulty, tags, imageUrl }, ingredients: ings.filter((i) => i.item), steps: steps.filter((s) => s.body) }
       if (recipe) {
         await updateRecipe(recipe.id, data)
         router.push(`/recipes/${recipe.id}`)
@@ -60,7 +62,32 @@ export default function RecipeEditor({ recipe }: Props) {
         </button>
       </div>
 
+      {/* Image preview */}
+      {imageUrl && (
+        <div className="relative shrink-0" style={{ height: 180 }}>
+          <FoodImg src={imageUrl} tone={recipe?.imageTone ?? '#B8543F'} fill />
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto pb-10 px-[22px] scroll">
+        {/* Image URL */}
+        <div className="mb-4 mt-4">
+          <label className="text-[11px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: 'var(--ink-muted)' }}>Photo URL</label>
+          <div className="flex gap-2">
+            <input value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..."
+              className="flex-1 h-10 px-3 rounded-[12px] text-[13px] outline-none"
+              style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink)' }} />
+            <button
+              type="button"
+              onClick={() => setImageUrl(`https://source.unsplash.com/800x500/?food,${encodeURIComponent(title || 'cooking')}`)}
+              className="h-10 px-3 rounded-[12px] text-[12px] font-semibold flex items-center gap-1.5 shrink-0"
+              style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink-2)' }}
+            >
+              <Icons.image /> Random
+            </button>
+          </div>
+        </div>
+
         {/* Title */}
         <div className="mb-4">
           <label className="text-[11px] font-bold uppercase tracking-widest mb-1.5 block" style={{ color: 'var(--ink-muted)' }}>Title</label>

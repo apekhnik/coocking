@@ -21,4 +21,6 @@ export const Icons = {
   check:  (p: P = {}) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="m2.5 6.5 2.5 2.5 4.5-5.5"/></svg>,
   add:    (p: P = {}) => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" {...p}><path d="M8 4v8M4 8h8"/></svg>,
   x:      (p: P = {}) => <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" {...p}><path d="M4 4l8 8M12 4l-8 8"/></svg>,
+  edit:   (p: P = {}) => <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><path d="M13.5 3.5a2.121 2.121 0 0 1 3 3L6 17l-4 1 1-4 10.5-10.5z"/></svg>,
+  image:  (p: P = {}) => <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...p}><rect x="2" y="3" width="16" height="14" rx="2"/><circle cx="7" cy="8.5" r="1.5"/><path d="M2 14l4.5-4.5 3 3 2.5-2.5 4 4"/></svg>,
 }

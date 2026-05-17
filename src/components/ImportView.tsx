@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Icons } from './Icon'
 import BottomNav from './BottomNav'
-import { importRecipesFromDocx } from '@/actions/recipes'
+import { importRecipesFromDocx, populateRecipeImages } from '@/actions/recipes'
 
 type Status =
   | { type: 'idle' }
@@ -12,10 +12,25 @@ type Status =
   | { type: 'success'; imported: number; skipped: number }
   | { type: 'error'; message: string }
 
+type ImageStatus = 'idle' | 'loading' | 'done'
+
 export default function ImportView() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [status, setStatus] = useState<Status>({ type: 'idle' })
+  const [imageStatus, setImageStatus] = useState<ImageStatus>('idle')
+  const [imagesUpdated, setImagesUpdated] = useState(0)
+
+  async function handleFillImages() {
+    setImageStatus('loading')
+    try {
+      const result = await populateRecipeImages()
+      setImagesUpdated(result.updated)
+      setImageStatus('done')
+    } catch {
+      setImageStatus('idle')
+    }
+  }
 
   async function handleFile(file: File) {
     if (!file.name.endsWith('.docx')) {
@@ -119,6 +134,26 @@ export default function ImportView() {
             <p className="text-[14px] mt-1 m-0">{status.message}</p>
           </div>
         )}
+
+        {/* Fill images button */}
+        <button
+          onClick={handleFillImages}
+          disabled={imageStatus === 'loading'}
+          className="flex items-center justify-center gap-3 rounded-[22px] p-5 w-full transition-opacity hover:opacity-80"
+          style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink)', opacity: imageStatus === 'loading' ? 0.6 : 1 }}
+        >
+          <span style={{ color: 'var(--terracotta)' }}>
+            <Icons.image />
+          </span>
+          <div className="text-left">
+            <p className="font-semibold text-[15px] m-0">
+              {imageStatus === 'loading' ? 'Завантажуємо фото...' : imageStatus === 'done' ? `Оновлено: ${imagesUpdated}` : 'Заповнити фото рецептів'}
+            </p>
+            <p className="text-[13px] m-0 mt-0.5" style={{ color: 'var(--ink-soft)' }}>
+              Підбере фото для рецептів без зображень
+            </p>
+          </div>
+        </button>
 
         {/* Export button */}
         <a

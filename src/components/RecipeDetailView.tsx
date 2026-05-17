@@ -39,7 +39,7 @@ export default function RecipeDetailView({ recipe }: Props) {
             </button>
             <Link href={`/recipes/${recipe.id}/edit`} className="w-10 h-10 rounded-full flex items-center justify-center"
               style={{ background: 'rgba(251,247,239,0.85)', backdropFilter: 'blur(10px)', color: 'var(--ink)' }}>
-              <Icons.doc />
+              <Icons.edit />
             </Link>
           </div>
         </div>
