@@ -17,6 +17,7 @@ interface RecipeFeedProps {
 export default function RecipeFeed({ recipes }: RecipeFeedProps) {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<string>('All')
+  const [view, setView] = useState<'grid' | 'rows'>('grid')
 
   const list = recipes.filter((r) => {
     if (filter === 'Favorites' && !r.isFavorite) return false
@@ -129,10 +130,29 @@ export default function RecipeFeed({ recipes }: RecipeFeedProps) {
 
         {/* Recipe grid */}
         <div className="px-[22px]">
-          <div className="flex items-baseline justify-between mb-3.5">
+          <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-serif m-0 text-[22px] font-medium">From your cookbook</h2>
-            <span className="text-[12px] font-semibold" style={{ color: 'var(--ink-muted)' }}>{list.length} recipes</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-semibold" style={{ color: 'var(--ink-muted)' }}>{list.length}</span>
+              <div className="flex rounded-[10px] overflow-hidden" style={{ border: '1px solid var(--rule-2)' }}>
+                <button
+                  onClick={() => setView('grid')}
+                  className="w-8 h-8 flex items-center justify-center"
+                  style={{ background: view === 'grid' ? 'var(--ink)' : 'transparent', color: view === 'grid' ? 'var(--surface)' : 'var(--ink-muted)' }}
+                >
+                  <Icons.grid />
+                </button>
+                <button
+                  onClick={() => setView('rows')}
+                  className="w-8 h-8 flex items-center justify-center"
+                  style={{ background: view === 'rows' ? 'var(--ink)' : 'transparent', color: view === 'rows' ? 'var(--surface)' : 'var(--ink-muted)', borderLeft: '1px solid var(--rule-2)' }}
+                >
+                  <Icons.rows />
+                </button>
+              </div>
+            </div>
           </div>
+
           {list.length === 0 && (
             <div className="text-center py-16" style={{ color: 'var(--ink-soft)' }}>
               <p className="text-[15px]">No recipes yet.</p>
@@ -141,11 +161,43 @@ export default function RecipeFeed({ recipes }: RecipeFeedProps) {
               </Link>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-x-3 gap-y-3.5">
-            {list.slice(1).map((r, i) => (
-              <RecipeCard key={r.id} recipe={r} tall={i % 3 === 1} />
-            ))}
-          </div>
+
+          {view === 'grid' ? (
+            <div className="grid grid-cols-2 gap-x-3 gap-y-3.5">
+              {list.slice(1).map((r, i) => (
+                <RecipeCard key={r.id} recipe={r} tall={i % 3 === 1} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {list.slice(1).map((r) => (
+                <Link key={r.id} href={`/recipes/${r.id}`}
+                  className="flex gap-3.5 rounded-[16px] p-3 items-center"
+                  style={{ background: 'var(--surface)', textDecoration: 'none' }}>
+                  <div className="relative shrink-0 rounded-[11px] overflow-hidden" style={{ width: 64, height: 64 }}>
+                    <FoodImg src={r.imageUrl} tone={r.imageTone} fill />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-serif text-[17px] leading-[1.2] font-medium m-0 truncate" style={{ color: 'var(--ink)' }}>
+                      {r.title}
+                    </h4>
+                    <div className="mt-1 text-[12px] flex gap-2 items-center" style={{ color: 'var(--ink-soft)' }}>
+                      <span className="inline-flex items-center gap-0.5"><Icons.clock />{r.cookTime}m</span>
+                      <span>·</span>
+                      <span>{r.difficulty}</span>
+                      {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
+                    </div>
+                  </div>
+                  <button
+                    onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
+                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
+                    style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                    {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                  </button>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
         <div className="h-10" />
       </div>

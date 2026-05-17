@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import FoodImg from './FoodImg'
-import BottomNav from './BottomNav'
 import { Icons } from './Icon'
 import type { RecipeWithRelations } from '@/actions/recipes'
 
@@ -133,7 +132,6 @@ export default function RecipeDetailView({ recipe }: Props) {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   )
 }
