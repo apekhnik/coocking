@@ -1,10 +1,16 @@
 import Link from 'next/link'
 import FoodImg from '@/components/FoodImg'
 import { Icons } from '@/components/Icon'
-import { toggleFavorite } from '@/actions/recipes'
+import { toggleFavorite, deleteRecipe } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
 export function DesktopFeature({ recipe }: { recipe: Recipe }) {
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!window.confirm(`Удалить «${recipe.title}»?`)) return
+    await deleteRecipe(recipe.id)
+  }
+
   return (
     <Link href={`/recipes/${recipe.id}`}
       className="relative block rounded-[22px] overflow-hidden"
@@ -32,6 +38,20 @@ export function DesktopFeature({ recipe }: { recipe: Recipe }) {
         {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
       </button>
 
+      {/* Delete button */}
+      <button
+        onClick={handleDelete}
+        className="absolute top-[68px] right-[18px] w-[42px] h-[42px] rounded-full flex items-center justify-center"
+        style={{
+          background: 'rgba(0,0,0,0.32)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          color: '#fff',
+        }}
+      >
+        <Icons.trash style={{ width: 18, height: 18 }} />
+      </button>
+
       {/* Caption */}
       <div className="absolute left-0 right-0 bottom-0 text-white" style={{ padding: '28px 30px' }}>
         <div className="text-[11px] font-bold uppercase tracking-[0.18em]" style={{ opacity: 0.85 }}>
@@ -56,6 +76,12 @@ export function DesktopFeature({ recipe }: { recipe: Recipe }) {
 }
 
 export function DesktopRecipeWide({ recipe }: { recipe: Recipe }) {
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!window.confirm(`Удалить «${recipe.title}»?`)) return
+    await deleteRecipe(recipe.id)
+  }
+
   return (
     <Link href={`/recipes/${recipe.id}`}
       className="relative flex rounded-[18px] overflow-hidden no-underline"
@@ -81,10 +107,18 @@ export function DesktopRecipeWide({ recipe }: { recipe: Recipe }) {
           {recipe.subtitle}
         </p>
         <div className="flex-1" />
-        <div className="flex gap-3 text-[12px]" style={{ color: 'var(--ink-muted)' }}>
-          <span className="inline-flex items-center gap-1"><Icons.clock />{recipe.cookTime} min</span>
-          <span>·</span>
-          <span>{recipe.difficulty}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-3 text-[12px]" style={{ color: 'var(--ink-muted)' }}>
+            <span className="inline-flex items-center gap-1"><Icons.clock />{recipe.cookTime} min</span>
+            <span>·</span>
+            <span>{recipe.difficulty}</span>
+          </div>
+          <button
+            onClick={handleDelete}
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ color: 'var(--ink-soft)', border: '1px solid var(--rule-2)' }}>
+            <Icons.trash />
+          </button>
         </div>
       </div>
     </Link>
@@ -92,6 +126,12 @@ export function DesktopRecipeWide({ recipe }: { recipe: Recipe }) {
 }
 
 export function DesktopCard({ recipe }: { recipe: Recipe }) {
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!window.confirm(`Удалить «${recipe.title}»?`)) return
+    await deleteRecipe(recipe.id)
+  }
+
   return (
     <div className="relative">
       <Link href={`/recipes/${recipe.id}`} className="block">
@@ -109,6 +149,19 @@ export function DesktopCard({ recipe }: { recipe: Recipe }) {
             }}
           >
             {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+          </button>
+          {/* Delete */}
+          <button
+            onClick={handleDelete}
+            className="absolute top-2.5 left-2.5 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{
+              background: 'rgba(251,247,239,0.88)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(31,26,20,0.06)',
+              color: 'var(--ink-muted)',
+            }}
+          >
+            <Icons.trash />
           </button>
           {/* Time */}
           <div className="absolute left-2.5 bottom-2.5">

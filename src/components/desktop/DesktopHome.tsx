@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Icons } from '@/components/Icon'
 import FoodImg from '@/components/FoodImg'
 import { DesktopFeature, DesktopRecipeWide, DesktopCard } from './DesktopCard'
-import { toggleFavorite } from '@/actions/recipes'
+import { toggleFavorite, deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
 const FILTERS = ['All', 'Quick', 'Vegetarian', 'Sweet', 'Sunday'] as const
@@ -118,6 +118,17 @@ export default function DesktopHome({ recipes, title }: Props) {
         <div className="flex items-center justify-between mb-[18px]">
           <h2 className="font-serif m-0 text-[28px] font-medium">{title ?? 'From your cookbook'}</h2>
           <div className="flex items-center gap-2.5">
+            {recipes.length > 0 && (
+              <button
+                onClick={async () => {
+                  if (!window.confirm(`Удалить все ${recipes.length} рецепт(ов)? Это действие необратимо.`)) return
+                  await deleteAllRecipes()
+                }}
+                className="h-9 px-3.5 rounded-full text-[12.5px] font-semibold inline-flex items-center gap-1.5"
+                style={{ color: 'var(--ink-muted)', border: '1px solid var(--rule-2)' }}>
+                <Icons.trash style={{ width: 13, height: 13 }} /> Delete all
+              </button>
+            )}
             <div className="flex gap-1.5">
               {FILTERS.map((f) => {
                 const on = filter === f
@@ -183,12 +194,24 @@ export default function DesktopHome({ recipes, title }: Props) {
                     {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                   </div>
                 </div>
-                <button
-                  onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
-                  className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
-                  {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-                </button>
+                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                    {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                  </button>
+                  <button
+                    onClick={async (e) => {
+                      e.preventDefault()
+                      if (!window.confirm(`Удалить «${r.title}»?`)) return
+                      await deleteRecipe(r.id)
+                    }}
+                    className="w-9 h-9 rounded-full flex items-center justify-center"
+                    style={{ color: 'var(--ink-muted)' }}>
+                    <Icons.trash style={{ width: 15, height: 15 }} />
+                  </button>
+                </div>
               </Link>
             ))}
           </div>

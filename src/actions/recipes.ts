@@ -228,9 +228,15 @@ export async function importRecipesFromDocx(
 
     const imageUrl = await fetchFoodImageUrl(item.title)
 
+    const subtitle =
+      item.subtitle ||
+      (item.description && item.description !== '-'
+        ? item.description.split('\n')[0].trim().slice(0, 200)
+        : '')
+
     const [recipe] = await db
       .insert(recipes)
-      .values({ title: item.title, userId, imageUrl })
+      .values({ title: item.title, subtitle, userId, imageUrl })
       .returning()
 
     if (item.description && item.description !== '-') {
@@ -265,6 +271,24 @@ export async function importRecipesFromDocx(
 
   revalidatePath('/home')
   return { imported, skipped }
+}
+
+export async function deleteAllRecipes(): Promise<{ deleted: number }> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const all = await db
+    .select({ id: recipes.id })
+    .from(recipes)
+    .where(eq(recipes.userId, userId))
+
+  if (all.length === 0) return { deleted: 0 }
+
+  await db.delete(recipes).where(eq(recipes.userId, userId))
+
+  revalidatePath('/home')
+  revalidatePath('/favorites')
+  return { deleted: all.length }
 }
 
 export async function toggleFavorite(id: string) {

@@ -6,6 +6,7 @@ import FoodImg from './FoodImg'
 import RecipeCard from './RecipeCard'
 import BottomNav from './BottomNav'
 import { Icons } from './Icon'
+import { deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
 const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday'] as const
@@ -119,6 +120,22 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                   <span className="chip dark">{featured.tags[0]}</span>
                   <span className="chip dark">{featured.cookTime} min</span>
                 </div>
+                {/* Delete button */}
+                <button
+                  onClick={async (e) => {
+                    e.preventDefault()
+                    if (!window.confirm(`Удалить «${featured.title}»?`)) return
+                    await deleteRecipe(featured.id)
+                  }}
+                  className="absolute top-3.5 right-3.5 w-[34px] h-[34px] rounded-full flex items-center justify-center"
+                  style={{
+                    background: 'rgba(0,0,0,0.38)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                    color: '#fff',
+                  }}>
+                  <Icons.trash style={{ width: 15, height: 15 }} />
+                </button>
                 {/* Title */}
                 <div className="absolute left-0 right-0 bottom-0 px-5 pb-5 pt-[18px] text-white">
                   <div className="text-[11px] font-bold tracking-[0.16em] uppercase opacity-85">
@@ -137,6 +154,17 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-serif m-0 text-[22px] font-medium">From your cookbook</h2>
             <div className="flex items-center gap-2">
+              {list.length > 0 && (
+                <button
+                  onClick={async () => {
+                    if (!window.confirm(`Удалить все ${list.length} рецепт(ов)? Это действие необратимо.`)) return
+                    await deleteAllRecipes()
+                  }}
+                  className="h-[30px] px-2.5 rounded-full text-[11px] font-semibold inline-flex items-center gap-1"
+                  style={{ color: 'var(--ink-muted)', border: '1px solid var(--rule-2)' }}>
+                  <Icons.trash style={{ width: 12, height: 12 }} /> Delete all
+                </button>
+              )}
               <span className="text-[12px] font-semibold" style={{ color: 'var(--ink-muted)' }}>{list.length}</span>
               <div className="flex rounded-[10px] overflow-hidden" style={{ border: '1px solid var(--rule-2)' }}>
                 <button
@@ -192,12 +220,24 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                       {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                     </div>
                   </div>
-                  <button
-                    onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
-                    className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center"
-                    style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
-                    {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                      {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        if (!window.confirm(`Удалить «${r.title}»?`)) return
+                        await deleteRecipe(r.id)
+                      }}
+                      className="w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ color: 'var(--ink-muted)' }}>
+                      <Icons.trash />
+                    </button>
+                  </div>
                 </Link>
               ))}
             </div>

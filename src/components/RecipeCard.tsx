@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import FoodImg from './FoodImg'
 import { Icons } from './Icon'
-import { toggleFavorite } from '@/actions/recipes'
+import { toggleFavorite, deleteRecipe } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
 interface RecipeCardProps {
@@ -13,6 +13,12 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
   const aspectRatio = tall ? '3/4.2' : '3/3.4'
+
+  async function handleDelete(e: React.MouseEvent) {
+    e.preventDefault()
+    if (!window.confirm(`Удалить «${recipe.title}»?`)) return
+    await deleteRecipe(recipe.id)
+  }
 
   return (
     <div className="cursor-pointer rounded-[18px] overflow-hidden">
@@ -31,6 +37,18 @@ export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
               color: recipe.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)',
             }}>
             {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+          </button>
+          {/* Delete button */}
+          <button
+            onClick={handleDelete}
+            className="absolute top-2 left-2 w-[30px] h-[30px] rounded-full flex items-center justify-center"
+            style={{
+              background: 'rgba(251,247,239,0.85)',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(31,26,20,0.06)',
+              color: 'var(--ink-muted)',
+            }}>
+            <Icons.trash />
           </button>
           {/* Time badge */}
           <div className="absolute left-2 bottom-2">

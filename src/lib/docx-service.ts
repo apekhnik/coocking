@@ -2,6 +2,7 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
 interface RecipeWithRelations {
   id: string
   title: string
+  subtitle?: string
   createdAt: Date
   steps: { body: string; position: number }[]
   ingredients: { qty: string; unit: string; item: string; position: number }[]
@@ -9,6 +10,7 @@ interface RecipeWithRelations {
 
 interface ParsedRecipe {
   title: string
+  subtitle?: string
   description: string
   ingredients: string
 }
@@ -102,6 +104,7 @@ export async function generateRecipeDocument(recipes: RecipeWithRelations[]): Pr
   const jsonData = recipes.map(r => ({
     id: r.id,
     title: r.title,
+    subtitle: r.subtitle ?? '',
     description: r.steps
       .sort((a, b) => a.position - b.position)
       .map(s => s.body)
