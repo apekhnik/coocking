@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Icons } from './Icon'
 import FoodImg from './FoodImg'
 import { createRecipe, updateRecipe } from '@/actions/recipes'
+import { getKeywords } from '@/lib/image-service'
 import type { RecipeWithRelations } from '@/actions/recipes'
 
 const TAGS = ['Italian', 'Japanese', 'French', 'Mexican', 'Vegetarian', 'Vegan', 'Gluten-free', 'Quick', 'Sunday', 'Comfort', 'Dessert', 'Breakfast']
@@ -106,7 +107,7 @@ export default function RecipeEditor({ recipe }: Props) {
             </label>
             <button
               type="button"
-              onClick={() => setImageUrl(`https://source.unsplash.com/800x500/?food,${encodeURIComponent(title || 'cooking')}`)}
+              onClick={() => setImageUrl(`https://source.unsplash.com/800x500/?${getKeywords(title || 'food')}`)}
               className="h-10 px-3 rounded-[12px] text-[12px] font-semibold flex items-center gap-1.5 shrink-0"
               style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)', color: 'var(--ink-2)' }}
             >

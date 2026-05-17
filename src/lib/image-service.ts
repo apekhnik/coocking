@@ -26,7 +26,7 @@ const KEYWORD_MAP: [string, string][] = [
   ['греч',      'salad,mediterranean,fresh'],
 ]
 
-function getKeywords(title: string): string {
+export function getKeywords(title: string): string {
   const lower = title.toLowerCase()
   for (const [key, val] of KEYWORD_MAP) {
     if (lower.includes(key)) return val
