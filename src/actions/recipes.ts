@@ -4,8 +4,9 @@ import { auth } from '@clerk/nextjs/server'
 import { db } from '@/db'
 import { recipes, ingredients, steps } from '@/db/schema'
 import type { NewRecipe } from '@/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
+import { parseDocxToRecipes } from '@/lib/docx-service'
 
 export type RecipeWithRelations = Awaited<ReturnType<typeof getRecipe>>
 
@@ -141,6 +142,99 @@ export async function deleteRecipe(id: string) {
     .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
 
   revalidatePath('/home')
+}
+
+export async function getRecipesWithRelations() {
+  const { userId } = await auth()
+  if (!userId) return []
+
+  const allRecipes = await db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.userId, userId))
+    .orderBy(recipes.createdAt)
+
+  if (!allRecipes.length) return []
+
+  const ids = allRecipes.map(r => r.id)
+
+  const [allIngredients, allSteps] = await Promise.all([
+    db.select().from(ingredients).where(inArray(ingredients.recipeId, ids)),
+    db.select().from(steps).where(inArray(steps.recipeId, ids)),
+  ])
+
+  return allRecipes.map(recipe => ({
+    ...recipe,
+    ingredients: allIngredients.filter(i => i.recipeId === recipe.id),
+    steps: allSteps.filter(s => s.recipeId === recipe.id),
+  }))
+}
+
+export async function importRecipesFromDocx(
+  formData: FormData
+): Promise<{ imported: number; skipped: number }> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const file = formData.get('file') as File
+  if (!file) throw new Error('Файл не знайдено')
+
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const parsed = await parseDocxToRecipes(buffer)
+
+  const existingRecipes = await db
+    .select({ title: recipes.title })
+    .from(recipes)
+    .where(eq(recipes.userId, userId))
+
+  const existingTitles = new Set(existingRecipes.map(r => r.title))
+
+  let imported = 0
+  let skipped = 0
+
+  for (const item of parsed) {
+    if (!item.title || existingTitles.has(item.title)) {
+      skipped++
+      continue
+    }
+
+    const [recipe] = await db
+      .insert(recipes)
+      .values({ title: item.title, userId })
+      .returning()
+
+    if (item.description && item.description !== '-') {
+      await db.insert(steps).values({
+        recipeId: recipe.id,
+        body: item.description,
+        title: '',
+        position: 0,
+      })
+    }
+
+    const ingredientLines = (item.ingredients ?? '')
+      .split('\n')
+      .map((l: string) => l.trim())
+      .filter(Boolean)
+
+    if (ingredientLines.length) {
+      await db.insert(ingredients).values(
+        ingredientLines.map((line: string, position: number) => ({
+          recipeId: recipe.id,
+          item: line,
+          qty: '',
+          unit: '',
+          position,
+        }))
+      )
+    }
+
+    existingTitles.add(item.title)
+    imported++
+  }
+
+  revalidatePath('/home')
+  return { imported, skipped }
 }
 
 export async function toggleFavorite(id: string) {
