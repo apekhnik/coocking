@@ -62,6 +62,11 @@ export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
           <h4 className="font-serif m-0 text-[18px] leading-[1.12] font-medium" style={{ color: 'var(--ink)' }}>
             {recipe.title}
           </h4>
+          {recipe.subtitle && (
+            <p className="font-serif italic text-[13px] leading-[1.3] mt-1 mb-0 line-clamp-2" style={{ color: 'var(--ink-muted)' }}>
+              {recipe.subtitle}
+            </p>
+          )}
           <div className="mt-1 text-[11.5px] flex gap-2 items-center" style={{ color: 'var(--ink-soft)' }}>
             <span className="inline-flex items-center gap-0.5"><Icons.flame />{recipe.difficulty}</span>
             <span>·</span>

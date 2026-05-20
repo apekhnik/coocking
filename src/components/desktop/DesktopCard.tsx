@@ -174,6 +174,11 @@ export function DesktopCard({ recipe }: { recipe: Recipe }) {
         <h4 className="font-serif mt-3 mb-1 text-[21px] font-medium leading-[1.1]" style={{ color: 'var(--ink)' }}>
           {recipe.title}
         </h4>
+        {recipe.subtitle && (
+          <p className="font-serif italic text-[13px] leading-[1.3] mt-0.5 mb-1 line-clamp-2" style={{ color: 'var(--ink-muted)' }}>
+            {recipe.subtitle}
+          </p>
+        )}
         <div className="text-[12px] flex gap-2" style={{ color: 'var(--ink-muted)' }}>
           <span className="inline-flex items-center gap-0.5"><Icons.flame />{recipe.difficulty}</span>
           <span>·</span>
