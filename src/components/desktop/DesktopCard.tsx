@@ -61,7 +61,7 @@ export function DesktopFeature({ recipe, description }: { recipe: Recipe; descri
           {recipe.title}
         </h3>
         {description && (
-          <div className="font-serif italic line-clamp-2" style={{ opacity: 0.85, fontSize: 'clamp(15px, 1.3vw, 21px)', lineHeight: 1.45 }}>
+          <div className="font-serif italic line-clamp-3" style={{ opacity: 0.85, fontSize: 'clamp(16px, 1.5vw, 22px)', lineHeight: 1.5 }}>
             {description}
           </div>
         )}
@@ -96,22 +96,23 @@ export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; des
       <div className="relative shrink-0" style={{ width: '42%' }}>
         <FoodImg src={recipe.imageUrl} tone={recipe.imageTone} fill />
       </div>
-      <div className="flex-1 flex flex-col" style={{ padding: '20px 22px' }}>
+      <div className="flex-1 flex flex-col min-h-0" style={{ padding: '20px 22px' }}>
         <div className="flex gap-1.5 mb-1.5">
           {recipe.tags.slice(0, 2).map((t) => (
             <span key={t} className="chip">{t}</span>
           ))}
         </div>
-        <h3 className="font-serif m-0 mt-0.5 mb-1 leading-[1.05] font-medium" style={{ color: 'var(--ink)', fontSize: 'clamp(20px, 1.7vw, 26px)' }}>
+        <h3 className="font-serif m-0 mt-0.5 mb-2 leading-[1.05] font-medium" style={{ color: 'var(--ink)', fontSize: 'clamp(20px, 1.7vw, 26px)' }}>
           {recipe.title}
         </h3>
-        {description && (
-          <p className="font-serif italic m-0 line-clamp-2" style={{ color: 'var(--ink-muted)', fontSize: 'clamp(13px, 1.1vw, 16px)', lineHeight: 1.4 }}>
-            {description}
-          </p>
-        )}
-        <div className="flex-1" />
-        <div className="flex items-center justify-between">
+        <div className="flex-1 overflow-hidden min-h-0">
+          {description && (
+            <p className="font-serif italic m-0" style={{ color: 'var(--ink-muted)', fontSize: 'clamp(14px, 1.35vw, 18px)', lineHeight: 1.6 }}>
+              {description}
+            </p>
+          )}
+        </div>
+        <div className="flex items-center justify-between mt-3 shrink-0">
           <div className="flex gap-3 text-[12px]" style={{ color: 'var(--ink-muted)' }}>
             <span className="inline-flex items-center gap-1"><Icons.clock />{recipe.cookTime} min</span>
             <span>·</span>
