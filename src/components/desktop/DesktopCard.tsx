@@ -61,7 +61,7 @@ export function DesktopFeature({ recipe, description }: { recipe: Recipe; descri
           {recipe.title}
         </h3>
         {description && (
-          <div className="font-serif italic text-[17px] line-clamp-2" style={{ opacity: 0.85 }}>
+          <div className="font-serif italic line-clamp-2" style={{ opacity: 0.85, fontSize: 'clamp(15px, 1.3vw, 21px)', lineHeight: 1.45 }}>
             {description}
           </div>
         )}
@@ -102,11 +102,11 @@ export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; des
             <span key={t} className="chip">{t}</span>
           ))}
         </div>
-        <h3 className="font-serif m-0 mt-0.5 mb-1 text-[24px] leading-[1.05] font-medium" style={{ color: 'var(--ink)' }}>
+        <h3 className="font-serif m-0 mt-0.5 mb-1 leading-[1.05] font-medium" style={{ color: 'var(--ink)', fontSize: 'clamp(20px, 1.7vw, 26px)' }}>
           {recipe.title}
         </h3>
         {description && (
-          <p className="font-serif italic text-[14px] leading-[1.35] m-0 line-clamp-3" style={{ color: 'var(--ink-muted)' }}>
+          <p className="font-serif italic m-0 line-clamp-2" style={{ color: 'var(--ink-muted)', fontSize: 'clamp(13px, 1.1vw, 16px)', lineHeight: 1.4 }}>
             {description}
           </p>
         )}
