@@ -5,17 +5,31 @@ import Link from 'next/link'
 import FoodImg from './FoodImg'
 import { Icons } from './Icon'
 import type { RecipeWithRelations } from '@/actions/recipes'
+import { toggleShareRecipe } from '@/actions/recipes'
 
 type Tab = 'ingredients' | 'method'
 
 interface Props {
   recipe: NonNullable<RecipeWithRelations>
+  readOnly?: boolean
 }
 
-export default function RecipeDetailView({ recipe }: Props) {
+export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
   const [tab, setTab] = useState<Tab>('ingredients')
   const [servings, setServings] = useState(2)
   const [checked, setChecked] = useState<Set<number>>(new Set())
+  const [isPublic, setIsPublic] = useState(recipe.isPublic)
+  const [copied, setCopied] = useState(false)
+
+  async function handleShare() {
+    const { isPublic: next } = await toggleShareRecipe(recipe.id)
+    setIsPublic(next)
+    if (next) {
+      await navigator.clipboard.writeText(`${window.location.origin}/share/${recipe.id}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
 
   const scale = servings / 2
 
@@ -27,20 +41,29 @@ export default function RecipeDetailView({ recipe }: Props) {
         <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 60%)' }} />
         {/* Nav buttons */}
         <div className="absolute top-12 left-4 right-4 flex justify-between">
-          <Link href="/home" className="w-10 h-10 rounded-full flex items-center justify-center"
+          <Link href={readOnly ? '/' : '/home'} className="w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(251,247,239,0.85)', backdropFilter: 'blur(10px)', color: 'var(--ink)' }}>
             <Icons.back />
           </Link>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(251,247,239,0.85)', backdropFilter: 'blur(10px)', color: 'var(--ink)' }}>
-              <Icons.share />
-            </button>
-            <Link href={`/recipes/${recipe.id}/edit`} className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ background: 'rgba(251,247,239,0.85)', backdropFilter: 'blur(10px)', color: 'var(--ink)' }}>
-              <Icons.edit />
-            </Link>
-          </div>
+          {!readOnly && (
+            <div className="flex gap-2">
+              <button
+                onClick={handleShare}
+                title={copied ? 'Ссылка скопирована!' : isPublic ? 'Закрыть доступ' : 'Поделиться'}
+                className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{
+                  background: isPublic ? 'var(--terracotta)' : 'rgba(251,247,239,0.85)',
+                  backdropFilter: 'blur(10px)',
+                  color: isPublic ? '#fff' : 'var(--ink)',
+                }}>
+                <Icons.share />
+              </button>
+              <Link href={`/recipes/${recipe.id}/edit`} className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(251,247,239,0.85)', backdropFilter: 'blur(10px)', color: 'var(--ink)' }}>
+                <Icons.edit />
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -127,6 +150,20 @@ export default function RecipeDetailView({ recipe }: Props) {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {readOnly && (
+            <div className="mt-6 mb-2 px-4 py-3 rounded-[14px] flex items-center justify-between gap-3"
+              style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)' }}>
+              <p className="text-[13px] m-0" style={{ color: 'var(--ink-muted)' }}>
+                Хочешь сохранить рецепт в свою книгу?
+              </p>
+              <Link href="/sign-up"
+                className="shrink-0 h-[34px] px-3 rounded-[10px] text-[13px] font-semibold flex items-center"
+                style={{ background: 'var(--terracotta)', color: '#fff' }}>
+                Войти
+              </Link>
             </div>
           )}
         </div>
