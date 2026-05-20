@@ -332,6 +332,7 @@ export async function toggleShareRecipe(id: string): Promise<{ isPublic: boolean
     .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
 
   revalidatePath(`/recipes/${id}`)
+  revalidatePath(`/share/${id}`)
   return { isPublic: next }
 }
 

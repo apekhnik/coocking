@@ -12,9 +12,10 @@ type Tab = 'ingredients' | 'method'
 interface Props {
   recipe: NonNullable<RecipeWithRelations>
   readOnly?: boolean
+  showSignupBanner?: boolean
 }
 
-export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
+export default function RecipeDetailView({ recipe, readOnly = false, showSignupBanner = false }: Props) {
   const [tab, setTab] = useState<Tab>('ingredients')
   const [servings, setServings] = useState(2)
   const [checked, setChecked] = useState<Set<number>>(new Set())
@@ -22,16 +23,23 @@ export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
   const [copied, setCopied] = useState(false)
 
   async function handleShare() {
+    let next: boolean
     try {
-      const { isPublic: next } = await toggleShareRecipe(recipe.id)
-      setIsPublic(next)
-      if (next) {
+      const result = await toggleShareRecipe(recipe.id)
+      next = result.isPublic
+    } catch (err) {
+      console.error('Failed to toggle share:', err)
+      return
+    }
+    setIsPublic(next)
+    if (next) {
+      try {
         await navigator.clipboard.writeText(`${window.location.origin}/share/${recipe.id}`)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
+      } catch {
+        // clipboard write failed (non-HTTPS or permission denied) — ignore silently
       }
-    } catch {
-      // silently ignore — network/clipboard errors don't need user-facing feedback
     }
   }
 
@@ -157,7 +165,7 @@ export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
             </div>
           )}
 
-          {readOnly && (
+          {showSignupBanner && (
             <div className="mt-6 mb-2 px-4 py-3 rounded-[14px] flex items-center justify-between gap-3"
               style={{ background: 'var(--surface)', border: '1px solid var(--rule-2)' }}>
               <p className="text-[13px] m-0" style={{ color: 'var(--ink-muted)' }}>
