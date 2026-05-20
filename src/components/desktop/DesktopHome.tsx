@@ -6,12 +6,12 @@ import { Icons } from '@/components/Icon'
 import FoodImg from '@/components/FoodImg'
 import { DesktopFeature, DesktopRecipeWide, DesktopCard } from './DesktopCard'
 import { toggleFavorite, deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
-import type { Recipe } from '@/db/schema'
+import type { RecipeListItem } from '@/actions/recipes'
 
 const FILTERS = ['All', 'Quick', 'Vegetarian', 'Sweet', 'Sunday'] as const
 
 interface Props {
-  recipes: Recipe[]
+  recipes: RecipeListItem[]
   title?: string
 }
 
@@ -97,10 +97,19 @@ export default function DesktopHome({ recipes, title }: Props) {
           <EmptyState />
         ) : (
           <div className="grid gap-5" style={{ gridTemplateColumns: '1.4fr 1fr' }}>
-            {featured && <DesktopFeature recipe={featured} />}
+            {featured && (
+              <DesktopFeature
+                recipe={featured}
+                description={featured.subtitle || featured.steps?.[0]?.body}
+              />
+            )}
             <div className="grid gap-5" style={{ gridTemplateRows: secondaries.length > 1 ? '1fr 1fr' : '1fr' }}>
               {secondaries.map((r) => (
-                <DesktopRecipeWide key={r.id} recipe={r} />
+                <DesktopRecipeWide
+                  key={r.id}
+                  recipe={r}
+                  description={r.subtitle || r.steps?.[0]?.body}
+                />
               ))}
               {secondaries.length === 0 && (
                 <div className="rounded-[18px] flex items-center justify-center text-[14px]"

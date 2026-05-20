@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { getRecipes } from '@/actions/recipes'
+import { getRecipesWithRelations } from '@/actions/recipes'
 import AppShell from '@/components/AppShell'
 import RecipeFeed from '@/components/RecipeFeed'
 import DesktopHome from '@/components/desktop/DesktopHome'
@@ -9,7 +9,7 @@ export default async function HomePage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const recipes = await getRecipes(userId)
+  const recipes = await getRecipesWithRelations()
 
   return (
     <AppShell>

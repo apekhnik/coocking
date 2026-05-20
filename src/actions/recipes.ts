@@ -10,6 +10,7 @@ import { parseDocxToRecipes } from '@/lib/docx-service'
 import { fetchFoodImageUrl } from '@/lib/image-service'
 
 export type RecipeWithRelations = Awaited<ReturnType<typeof getRecipe>>
+export type RecipeListItem = Awaited<ReturnType<typeof getRecipesWithRelations>>[number]
 
 export async function getRecipes(userId?: string) {
   const { userId: authUserId } = await auth()

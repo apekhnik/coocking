@@ -4,7 +4,7 @@ import { Icons } from '@/components/Icon'
 import { toggleFavorite, deleteRecipe } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
-export function DesktopFeature({ recipe }: { recipe: Recipe }) {
+export function DesktopFeature({ recipe, description }: { recipe: Recipe; description?: string }) {
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
     if (!window.confirm(`Удалить «${recipe.title}»?`)) return
@@ -60,9 +60,11 @@ export function DesktopFeature({ recipe }: { recipe: Recipe }) {
         <h3 className="font-serif mt-2 mb-1.5 text-[46px] leading-none font-medium">
           {recipe.title}
         </h3>
-        <div className="font-serif italic text-[17px]" style={{ opacity: 0.85 }}>
-          {recipe.subtitle}
-        </div>
+        {description && (
+          <div className="font-serif italic text-[17px] line-clamp-2" style={{ opacity: 0.85 }}>
+            {description}
+          </div>
+        )}
         <div className="flex gap-3.5 mt-3.5 text-[12px]" style={{ opacity: 0.85 }}>
           <span className="inline-flex items-center gap-1.5"><Icons.clock />{recipe.cookTime} min</span>
           <span>·</span>
@@ -75,7 +77,7 @@ export function DesktopFeature({ recipe }: { recipe: Recipe }) {
   )
 }
 
-export function DesktopRecipeWide({ recipe }: { recipe: Recipe }) {
+export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; description?: string }) {
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
     if (!window.confirm(`Удалить «${recipe.title}»?`)) return
@@ -103,9 +105,11 @@ export function DesktopRecipeWide({ recipe }: { recipe: Recipe }) {
         <h3 className="font-serif m-0 mt-0.5 mb-1 text-[24px] leading-[1.05] font-medium" style={{ color: 'var(--ink)' }}>
           {recipe.title}
         </h3>
-        <p className="font-serif italic text-[14px] leading-[1.35] m-0" style={{ color: 'var(--ink-muted)' }}>
-          {recipe.subtitle}
-        </p>
+        {description && (
+          <p className="font-serif italic text-[14px] leading-[1.35] m-0 line-clamp-3" style={{ color: 'var(--ink-muted)' }}>
+            {description}
+          </p>
+        )}
         <div className="flex-1" />
         <div className="flex items-center justify-between">
           <div className="flex gap-3 text-[12px]" style={{ color: 'var(--ink-muted)' }}>
