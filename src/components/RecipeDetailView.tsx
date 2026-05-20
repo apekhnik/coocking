@@ -22,12 +22,16 @@ export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
   const [copied, setCopied] = useState(false)
 
   async function handleShare() {
-    const { isPublic: next } = await toggleShareRecipe(recipe.id)
-    setIsPublic(next)
-    if (next) {
-      await navigator.clipboard.writeText(`${window.location.origin}/share/${recipe.id}`)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+    try {
+      const { isPublic: next } = await toggleShareRecipe(recipe.id)
+      setIsPublic(next)
+      if (next) {
+        await navigator.clipboard.writeText(`${window.location.origin}/share/${recipe.id}`)
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    } catch {
+      // silently ignore — network/clipboard errors don't need user-facing feedback
     }
   }
 
@@ -162,7 +166,7 @@ export default function RecipeDetailView({ recipe, readOnly = false }: Props) {
               <Link href="/sign-up"
                 className="shrink-0 h-[34px] px-3 rounded-[10px] text-[13px] font-semibold flex items-center"
                 style={{ background: 'var(--terracotta)', color: '#fff' }}>
-                Войти
+                Зарегистрироваться
               </Link>
             </div>
           )}
