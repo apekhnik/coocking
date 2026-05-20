@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { toast } from 'sonner'
 import FoodImg from './FoodImg'
 import { Icons } from './Icon'
 import type { RecipeWithRelations } from '@/actions/recipes'
@@ -20,7 +21,6 @@ export default function RecipeDetailView({ recipe, readOnly = false, showSignupB
   const [servings, setServings] = useState(2)
   const [checked, setChecked] = useState<Set<number>>(new Set())
   const [isPublic, setIsPublic] = useState(recipe.isPublic)
-  const [copied, setCopied] = useState(false)
 
   async function handleShare() {
     let next: boolean
@@ -29,17 +29,19 @@ export default function RecipeDetailView({ recipe, readOnly = false, showSignupB
       next = result.isPublic
     } catch (err) {
       console.error('Failed to toggle share:', err)
+      toast.error('Не удалось изменить доступ')
       return
     }
     setIsPublic(next)
     if (next) {
       try {
         await navigator.clipboard.writeText(`${window.location.origin}/share/${recipe.id}`)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
+        toast.success('Ссылка скопирована!')
       } catch {
-        // clipboard write failed (non-HTTPS or permission denied) — ignore silently
+        toast.success('Рецепт открыт — скопируй ссылку из адресной строки')
       }
+    } else {
+      toast('Доступ закрыт')
     }
   }
 
@@ -61,7 +63,7 @@ export default function RecipeDetailView({ recipe, readOnly = false, showSignupB
             <div className="flex gap-2">
               <button
                 onClick={handleShare}
-                title={copied ? 'Ссылка скопирована!' : isPublic ? 'Закрыть доступ' : 'Поделиться'}
+                title={isPublic ? 'Закрыть доступ' : 'Поделиться'}
                 className="w-10 h-10 rounded-full flex items-center justify-center"
                 style={{
                   background: isPublic ? 'var(--terracotta)' : 'rgba(251,247,239,0.85)',
