@@ -311,3 +311,51 @@ export async function toggleFavorite(id: string) {
   revalidatePath('/home')
   revalidatePath(`/recipes/${id}`)
 }
+
+export async function toggleShareRecipe(id: string): Promise<{ isPublic: boolean }> {
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+
+  const [recipe] = await db
+    .select({ isPublic: recipes.isPublic })
+    .from(recipes)
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+    .limit(1)
+
+  if (!recipe) throw new Error('Not found')
+
+  const next = !recipe.isPublic
+
+  await db
+    .update(recipes)
+    .set({ isPublic: next, updatedAt: new Date() })
+    .where(and(eq(recipes.id, id), eq(recipes.userId, userId)))
+
+  revalidatePath(`/recipes/${id}`)
+  return { isPublic: next }
+}
+
+export async function getPublicRecipe(id: string) {
+  const [recipe] = await db
+    .select()
+    .from(recipes)
+    .where(and(eq(recipes.id, id), eq(recipes.isPublic, true)))
+    .limit(1)
+
+  if (!recipe) return null
+
+  const [recipeIngredients, recipeSteps] = await Promise.all([
+    db
+      .select()
+      .from(ingredients)
+      .where(eq(ingredients.recipeId, id))
+      .orderBy(ingredients.position),
+    db
+      .select()
+      .from(steps)
+      .where(eq(steps.recipeId, id))
+      .orderBy(steps.position),
+  ])
+
+  return { ...recipe, ingredients: recipeIngredients, steps: recipeSteps }
+}
