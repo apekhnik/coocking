@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { getRecipes } from '@/actions/recipes'
+import { getRecipesWithRelations } from '@/actions/recipes'
 import AppShell from '@/components/AppShell'
 import RecipeFeed from '@/components/RecipeFeed'
 import DesktopHome from '@/components/desktop/DesktopHome'
@@ -9,7 +9,7 @@ export default async function FavoritesPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
 
-  const all = await getRecipes(userId)
+  const all = await getRecipesWithRelations()
   const recipes = all.filter((r) => r.isFavorite)
 
   return (
