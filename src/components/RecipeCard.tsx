@@ -4,6 +4,7 @@ import Link from 'next/link'
 import FoodImg from './FoodImg'
 import { Icons } from './Icon'
 import { toggleFavorite, deleteRecipe } from '@/actions/recipes'
+import { useAuth } from '@clerk/nextjs'
 import type { Recipe } from '@/db/schema'
 
 interface RecipeCardProps {
@@ -13,6 +14,7 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
   const aspectRatio = tall ? '3/4.2' : '3/3.4'
+  const { userId } = useAuth()
 
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
@@ -27,29 +29,33 @@ export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
           style={{ aspectRatio }}>
           <FoodImg src={recipe.imageUrl} tone={recipe.imageTone} label={recipe.title} fill />
           {/* Favorite button */}
-          <button
-            onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
-            className="absolute top-2 right-2 w-[30px] h-[30px] rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(251,247,239,0.85)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(31,26,20,0.06)',
-              color: recipe.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)',
-            }}>
-            {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-          </button>
+          {userId && (
+            <button
+              onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
+              className="absolute top-2 right-2 w-[30px] h-[30px] rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(251,247,239,0.85)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(31,26,20,0.06)',
+                color: recipe.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)',
+              }}>
+              {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+            </button>
+          )}
           {/* Delete button */}
-          <button
-            onClick={handleDelete}
-            className="absolute top-2 left-2 w-[30px] h-[30px] rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(251,247,239,0.85)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(31,26,20,0.06)',
-              color: 'var(--ink-muted)',
-            }}>
-            <Icons.trash />
-          </button>
+          {userId && (
+            <button
+              onClick={handleDelete}
+              className="absolute top-2 left-2 w-[30px] h-[30px] rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(251,247,239,0.85)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(31,26,20,0.06)',
+                color: 'var(--ink-muted)',
+              }}>
+              <Icons.trash />
+            </button>
+          )}
           {/* Time badge */}
           <div className="absolute left-2 bottom-2">
             <span className="inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[10.5px] font-semibold"
