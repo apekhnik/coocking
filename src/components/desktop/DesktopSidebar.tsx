@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
+import { UserButton, useAuth } from '@clerk/nextjs'
 import { usePathname } from 'next/navigation'
 import { Icons } from '@/components/Icon'
 
@@ -22,6 +22,7 @@ const COLLECTIONS = [
 
 export default function DesktopSidebar() {
   const pathname = usePathname()
+  const { userId } = useAuth()
 
   return (
     <aside
@@ -99,7 +100,7 @@ export default function DesktopSidebar() {
       <div className="flex-1" />
 
       {/* Import card — only for authenticated users */}
-      <SignedIn>
+      {userId && (
         <Link href="/import"
           className="flex items-center gap-2.5 px-3.5 py-3.5 rounded-[14px] no-underline"
           style={{ background: 'var(--ink)', color: 'var(--surface)' }}
@@ -110,19 +111,17 @@ export default function DesktopSidebar() {
             <div style={{ opacity: 0.6 }}>Bring in your archive</div>
           </div>
         </Link>
-      </SignedIn>
+      )}
 
       {/* Auth section */}
-      <SignedIn>
+      {userId ? (
         <div className="mt-3 flex items-center gap-2.5 px-1">
           <UserButton />
           <span className="text-[12px] font-medium truncate" style={{ color: 'var(--ink-muted)' }}>
             My account
           </span>
         </div>
-      </SignedIn>
-
-      <SignedOut>
+      ) : (
         <div className="mt-3 flex flex-col gap-2">
           <Link href="/sign-in"
             className="flex items-center justify-center h-9 rounded-[10px] text-[13px] font-semibold no-underline"
@@ -137,7 +136,7 @@ export default function DesktopSidebar() {
             Register
           </Link>
         </div>
-      </SignedOut>
+      )}
     </aside>
   )
 }

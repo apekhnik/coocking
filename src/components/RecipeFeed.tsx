@@ -8,7 +8,7 @@ import BottomNav from './BottomNav'
 import { Icons } from './Icon'
 import { deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
-import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs'
+import { UserButton, useAuth } from '@clerk/nextjs'
 
 const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday'] as const
 
@@ -55,16 +55,15 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
             </h1>
           </div>
           <div className="w-[42px] h-[42px] flex items-center justify-center">
-            <SignedIn>
+            {userId ? (
               <UserButton />
-            </SignedIn>
-            <SignedOut>
+            ) : (
               <Link href="/sign-in"
                 className="w-[42px] h-[42px] rounded-full flex items-center justify-center"
                 style={{ border: '1px solid var(--terracotta)', background: 'var(--surface)', color: 'var(--terracotta)' }}>
                 <Icons.user />
               </Link>
-            </SignedOut>
+            )}
           </div>
         </div>
       </div>
