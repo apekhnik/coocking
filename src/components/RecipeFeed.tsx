@@ -8,6 +8,7 @@ import BottomNav from './BottomNav'
 import { Icons } from './Icon'
 import { deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
+import { SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs'
 
 const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday'] as const
 
@@ -20,6 +21,7 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<string>('All')
   const [view, setView] = useState<'grid' | 'rows'>('grid')
+  const { userId } = useAuth()
 
   const list = recipes.filter((r) => {
     if (filter === 'Favorites' && !r.isFavorite) return false
@@ -52,10 +54,18 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
               }
             </h1>
           </div>
-          <button className="w-[42px] h-[42px] rounded-full flex items-center justify-center"
-            style={{ border: '1px solid var(--rule-2)', background: 'var(--surface)', color: 'var(--ink)' }}>
-            <Icons.user />
-          </button>
+          <div className="w-[42px] h-[42px] flex items-center justify-center">
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+            <SignedOut>
+              <Link href="/sign-in"
+                className="w-[42px] h-[42px] rounded-full flex items-center justify-center"
+                style={{ border: '1px solid var(--terracotta)', background: 'var(--surface)', color: 'var(--terracotta)' }}>
+                <Icons.user />
+              </Link>
+            </SignedOut>
+          </div>
         </div>
       </div>
 
@@ -121,21 +131,23 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                   <span className="chip dark">{featured.cookTime} min</span>
                 </div>
                 {/* Delete button */}
-                <button
-                  onClick={async (e) => {
-                    e.preventDefault()
-                    if (!window.confirm(`Удалить «${featured.title}»?`)) return
-                    await deleteRecipe(featured.id)
-                  }}
-                  className="absolute top-3.5 right-3.5 w-[34px] h-[34px] rounded-full flex items-center justify-center"
-                  style={{
-                    background: 'rgba(0,0,0,0.38)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    color: '#fff',
-                  }}>
-                  <Icons.trash style={{ width: 15, height: 15 }} />
-                </button>
+                {userId && (
+                  <button
+                    onClick={async (e) => {
+                      e.preventDefault()
+                      if (!window.confirm(`Удалить «${featured.title}»?`)) return
+                      await deleteRecipe(featured.id)
+                    }}
+                    className="absolute top-3.5 right-3.5 w-[34px] h-[34px] rounded-full flex items-center justify-center"
+                    style={{
+                      background: 'rgba(0,0,0,0.38)',
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      color: '#fff',
+                    }}>
+                    <Icons.trash style={{ width: 15, height: 15 }} />
+                  </button>
+                )}
                 {/* Title */}
                 <div className="absolute left-0 right-0 bottom-0 px-5 pb-5 pt-[18px] text-white">
                   <div className="text-[11px] font-bold tracking-[0.16em] uppercase opacity-85">
@@ -154,7 +166,7 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-serif m-0 text-[22px] font-medium">From your cookbook</h2>
             <div className="flex items-center gap-2">
-              {list.length > 0 && (
+              {userId && list.length > 0 && (
                 <button
                   onClick={async () => {
                     if (!window.confirm(`Удалить все ${list.length} рецепт(ов)? Это действие необратимо.`)) return
