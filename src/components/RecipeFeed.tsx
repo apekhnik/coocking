@@ -232,24 +232,26 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                       {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <button
-                      onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
-                      {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-                    </button>
-                    <button
-                      onClick={async (e) => {
-                        e.preventDefault()
-                        if (!window.confirm(`Удалить «${r.title}»?`)) return
-                        await deleteRecipe(r.id)
-                      }}
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ color: 'var(--ink-muted)' }}>
-                      <Icons.trash />
-                    </button>
-                  </div>
+                  {userId && (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                        {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          if (!window.confirm(`Удалить «${r.title}»?`)) return
+                          await deleteRecipe(r.id)
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center"
+                        style={{ color: 'var(--ink-muted)' }}>
+                        <Icons.trash />
+                      </button>
+                    </div>
+                  )}
                 </Link>
               ))}
             </div>
