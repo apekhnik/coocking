@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs'
 import { usePathname } from 'next/navigation'
 import { Icons } from '@/components/Icon'
 
@@ -97,17 +98,46 @@ export default function DesktopSidebar() {
 
       <div className="flex-1" />
 
-      {/* Import card */}
-      <Link href="/import"
-        className="flex items-center gap-2.5 px-3.5 py-3.5 rounded-[14px] no-underline"
-        style={{ background: 'var(--ink)', color: 'var(--surface)' }}
-      >
-        <span style={{ color: 'var(--honey)' }}><Icons.upload /></span>
-        <div className="flex-1 text-[12px] leading-[1.3]">
-          <div className="font-serif text-[14px] font-semibold">Import .docx</div>
-          <div style={{ opacity: 0.6 }}>Bring in your archive</div>
+      {/* Import card — only for authenticated users */}
+      <SignedIn>
+        <Link href="/import"
+          className="flex items-center gap-2.5 px-3.5 py-3.5 rounded-[14px] no-underline"
+          style={{ background: 'var(--ink)', color: 'var(--surface)' }}
+        >
+          <span style={{ color: 'var(--honey)' }}><Icons.upload /></span>
+          <div className="flex-1 text-[12px] leading-[1.3]">
+            <div className="font-serif text-[14px] font-semibold">Import .docx</div>
+            <div style={{ opacity: 0.6 }}>Bring in your archive</div>
+          </div>
+        </Link>
+      </SignedIn>
+
+      {/* Auth section */}
+      <SignedIn>
+        <div className="mt-3 flex items-center gap-2.5 px-1">
+          <UserButton />
+          <span className="text-[12px] font-medium truncate" style={{ color: 'var(--ink-muted)' }}>
+            My account
+          </span>
         </div>
-      </Link>
+      </SignedIn>
+
+      <SignedOut>
+        <div className="mt-3 flex flex-col gap-2">
+          <Link href="/sign-in"
+            className="flex items-center justify-center h-9 rounded-[10px] text-[13px] font-semibold no-underline"
+            style={{ border: '1px solid var(--rule-2)', color: 'var(--ink)' }}
+          >
+            Sign in
+          </Link>
+          <Link href="/sign-up"
+            className="flex items-center justify-center h-9 rounded-[10px] text-[13px] font-semibold no-underline"
+            style={{ background: 'var(--terracotta)', color: '#fff' }}
+          >
+            Register
+          </Link>
+        </div>
+      </SignedOut>
     </aside>
   )
 }
