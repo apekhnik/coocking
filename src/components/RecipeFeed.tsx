@@ -11,13 +11,16 @@ import type { RecipeListItem } from '@/actions/recipes'
 import { UserButton, useAuth } from '@clerk/nextjs'
 
 const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday'] as const
+const VISIBILITY_FILTERS = ['Public', 'Private'] as const
 
 interface RecipeFeedProps {
   recipes: RecipeListItem[]
   title?: string
+  showVisibilityFilter?: boolean
+  disableActions?: boolean
 }
 
-export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
+export default function RecipeFeed({ recipes, title, showVisibilityFilter, disableActions }: RecipeFeedProps) {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<string>('All')
   const [view, setView] = useState<'grid' | 'rows'>('grid')
@@ -26,7 +29,9 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
   const list = recipes.filter((r) => {
     if (filter === 'Favorites' && !r.isFavorite) return false
     if (filter === 'Quick' && r.cookTime > 30) return false
-    if (filter !== 'All' && filter !== 'Favorites' && filter !== 'Quick') {
+    if (filter === 'Public' && !r.isPublic) return false
+    if (filter === 'Private' && r.isPublic) return false
+    if (filter !== 'All' && filter !== 'Favorites' && filter !== 'Quick' && filter !== 'Public' && filter !== 'Private') {
       if (!r.tags.some((t) => t === filter)) return false
     }
     if (q && !r.title.toLowerCase().includes(q.toLowerCase())) return false
@@ -106,6 +111,20 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
               </button>
             )
           })}
+          {showVisibilityFilter && VISIBILITY_FILTERS.map((f) => {
+            const on = filter === f
+            return (
+              <button key={f} onClick={() => setFilter(f)}
+                className="h-[34px] px-3.5 rounded-full text-[12.5px] font-semibold tracking-tight whitespace-nowrap"
+                style={{
+                  border: on ? 'none' : '1px solid var(--rule-2)',
+                  background: on ? 'var(--ink)' : 'transparent',
+                  color: on ? 'var(--surface)' : 'var(--ink-2)',
+                }}>
+                {f}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -130,7 +149,7 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                   <span className="chip dark">{featured.cookTime} min</span>
                 </div>
                 {/* Delete button */}
-                {userId && (
+                {userId && !disableActions && (
                   <button
                     onClick={async (e) => {
                       e.preventDefault()
@@ -165,7 +184,7 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="font-serif m-0 text-[22px] font-medium">From your cookbook</h2>
             <div className="flex items-center gap-2">
-              {userId && list.length > 0 && (
+              {userId && !disableActions && list.length > 0 && (
                 <button
                   onClick={async () => {
                     if (!window.confirm(`Удалить все ${list.length} рецепт(ов)? Это действие необратимо.`)) return
@@ -231,7 +250,7 @@ export default function RecipeFeed({ recipes, title }: RecipeFeedProps) {
                       {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                     </div>
                   </div>
-                  {userId && (
+                  {userId && !disableActions && (
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         onClick={async (e) => { e.preventDefault(); const { toggleFavorite } = await import('@/actions/recipes'); await toggleFavorite(r.id) }}
