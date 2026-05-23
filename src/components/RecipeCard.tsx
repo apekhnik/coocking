@@ -63,6 +63,23 @@ export default function RecipeCard({ recipe, tall }: RecipeCardProps) {
               <Icons.clock /> {recipe.cookTime}m
             </span>
           </div>
+          {/* Visibility badge */}
+          <div className="absolute right-2 bottom-2">
+            <span
+              className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full"
+              style={{
+                background: recipe.isPublic ? 'var(--terracotta)' : 'rgba(31,26,20,0.55)',
+                backdropFilter: 'blur(8px)',
+                color: '#FBF7EF',
+              }}
+              title={recipe.isPublic ? 'Public' : 'Private'}
+            >
+              {recipe.isPublic
+                ? <Icons.share style={{ width: 10, height: 10 }} />
+                : <Icons.lock style={{ width: 10, height: 10 }} />
+              }
+            </span>
+          </div>
         </div>
         <div className="pt-2.5 px-1 pb-1">
           <h4 className="font-serif m-0 text-[18px] leading-[1.12] font-medium" style={{ color: 'var(--ink)' }}>
