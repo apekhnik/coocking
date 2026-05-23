@@ -4,7 +4,7 @@ import { auth } from '@clerk/nextjs/server'
 import { db } from '@/db'
 import { recipes, ingredients, steps } from '@/db/schema'
 import type { NewRecipe } from '@/db/schema'
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and, inArray, desc } from 'drizzle-orm'
 import { revalidatePath } from 'next/cache'
 import { parseDocxToRecipes } from '@/lib/docx-service'
 import { fetchFoodImageUrl } from '@/lib/image-service'
@@ -360,4 +360,27 @@ export async function getPublicRecipe(id: string) {
   ])
 
   return { ...recipe, ingredients: recipeIngredients, steps: recipeSteps }
+}
+
+export async function getPublicRecipes(): Promise<RecipeListItem[]> {
+  const allRecipes = await db
+    .select()
+    .from(recipes)
+    .where(eq(recipes.isPublic, true))
+    .orderBy(desc(recipes.createdAt))
+
+  if (!allRecipes.length) return []
+
+  const ids = allRecipes.map(r => r.id)
+
+  const [allIngredients, allSteps] = await Promise.all([
+    db.select().from(ingredients).where(inArray(ingredients.recipeId, ids)),
+    db.select().from(steps).where(inArray(steps.recipeId, ids)),
+  ])
+
+  return allRecipes.map(recipe => ({
+    ...recipe,
+    ingredients: allIngredients.filter(i => i.recipeId === recipe.id),
+    steps: allSteps.filter(s => s.recipeId === recipe.id),
+  }))
 }
