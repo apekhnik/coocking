@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useAuth } from '@clerk/nextjs'
 import { Icons } from '@/components/Icon'
 import FoodImg from '@/components/FoodImg'
 import { DesktopFeature, DesktopRecipeWide, DesktopCard } from './DesktopCard'
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export default function DesktopHome({ recipes, title }: Props) {
+  const { userId } = useAuth()
   const [filter, setFilter] = useState<string>('All')
   const [q, setQ] = useState('')
   const [view, setView] = useState<'grid' | 'rows'>('grid')
@@ -127,7 +129,7 @@ export default function DesktopHome({ recipes, title }: Props) {
         <div className="flex items-center justify-between mb-[18px]">
           <h2 className="font-serif m-0 text-[28px] font-medium">{title ?? 'From your cookbook'}</h2>
           <div className="flex items-center gap-2.5">
-            {recipes.length > 0 && (
+            {userId && recipes.length > 0 && (
               <button
                 onClick={async () => {
                   if (!window.confirm(`Удалить все ${recipes.length} рецепт(ов)? Это действие необратимо.`)) return
@@ -203,24 +205,26 @@ export default function DesktopHome({ recipes, title }: Props) {
                     {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
-                    {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-                  </button>
-                  <button
-                    onClick={async (e) => {
-                      e.preventDefault()
-                      if (!window.confirm(`Удалить «${r.title}»?`)) return
-                      await deleteRecipe(r.id)
-                    }}
-                    className="w-9 h-9 rounded-full flex items-center justify-center"
-                    style={{ color: 'var(--ink-muted)' }}>
-                    <Icons.trash style={{ width: 15, height: 15 }} />
-                  </button>
-                </div>
+                {userId && (
+                  <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      style={{ color: r.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)' }}>
+                      {r.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.preventDefault()
+                        if (!window.confirm(`Удалить «${r.title}»?`)) return
+                        await deleteRecipe(r.id)
+                      }}
+                      className="w-9 h-9 rounded-full flex items-center justify-center"
+                      style={{ color: 'var(--ink-muted)' }}>
+                      <Icons.trash style={{ width: 15, height: 15 }} />
+                    </button>
+                  </div>
+                )}
               </Link>
             ))}
           </div>
