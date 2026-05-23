@@ -7,13 +7,13 @@ import RecipeCard from './RecipeCard'
 import BottomNav from './BottomNav'
 import { Icons } from './Icon'
 import { deleteRecipe, deleteAllRecipes } from '@/actions/recipes'
-import type { Recipe } from '@/db/schema'
+import type { RecipeListItem } from '@/actions/recipes'
 import { UserButton, useAuth } from '@clerk/nextjs'
 
 const FILTERS = ['All', 'Favorites', 'Quick', 'Vegetarian', 'Dessert', 'Sunday'] as const
 
 interface RecipeFeedProps {
-  recipes: Recipe[]
+  recipes: RecipeListItem[]
   title?: string
 }
 
