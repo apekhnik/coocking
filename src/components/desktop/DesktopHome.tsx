@@ -108,6 +108,7 @@ export default function DesktopHome({ recipes, title, showVisibilityFilter, disa
               <DesktopFeature
                 recipe={featured}
                 description={featured.subtitle || featured.steps?.[0]?.body}
+                disableActions={disableActions}
               />
             )}
             <div className="grid gap-5" style={{ gridTemplateRows: secondaries.length > 1 ? '1fr 1fr' : '1fr' }}>
@@ -116,6 +117,7 @@ export default function DesktopHome({ recipes, title, showVisibilityFilter, disa
                   key={r.id}
                   recipe={r}
                   description={r.subtitle || r.steps?.[0]?.body}
+                  disableActions={disableActions}
                 />
               ))}
               {secondaries.length === 0 && (
@@ -201,7 +203,7 @@ export default function DesktopHome({ recipes, title, showVisibilityFilter, disa
         {view === 'grid' ? (
           <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
             {grid.map((r) => (
-              <DesktopCard key={r.id} recipe={r} />
+              <DesktopCard key={r.id} recipe={r} disableActions={disableActions} />
             ))}
           </div>
         ) : (

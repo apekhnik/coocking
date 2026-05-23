@@ -4,7 +4,7 @@ import { Icons } from '@/components/Icon'
 import { toggleFavorite, deleteRecipe } from '@/actions/recipes'
 import type { Recipe } from '@/db/schema'
 
-export function DesktopFeature({ recipe, description }: { recipe: Recipe; description?: string }) {
+export function DesktopFeature({ recipe, description, disableActions }: { recipe: Recipe; description?: string; disableActions?: boolean }) {
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
     if (!window.confirm(`Удалить «${recipe.title}»?`)) return
@@ -44,32 +44,36 @@ export function DesktopFeature({ recipe, description }: { recipe: Recipe; descri
       </div>
 
       {/* Fav button */}
-      <button
-        onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
-        className="absolute top-[18px] right-[18px] w-[42px] h-[42px] rounded-full flex items-center justify-center"
-        style={{
-          background: 'rgba(0,0,0,0.32)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.18)',
-          color: '#fff',
-        }}
-      >
-        {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-      </button>
+      {!disableActions && (
+        <button
+          onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
+          className="absolute top-[18px] right-[18px] w-[42px] h-[42px] rounded-full flex items-center justify-center"
+          style={{
+            background: 'rgba(0,0,0,0.32)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            color: '#fff',
+          }}
+        >
+          {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+        </button>
+      )}
 
       {/* Delete button */}
-      <button
-        onClick={handleDelete}
-        className="absolute top-[68px] right-[18px] w-[42px] h-[42px] rounded-full flex items-center justify-center"
-        style={{
-          background: 'rgba(0,0,0,0.32)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(255,255,255,0.18)',
-          color: '#fff',
-        }}
-      >
-        <Icons.trash style={{ width: 18, height: 18 }} />
-      </button>
+      {!disableActions && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-[68px] right-[18px] w-[42px] h-[42px] rounded-full flex items-center justify-center"
+          style={{
+            background: 'rgba(0,0,0,0.32)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            color: '#fff',
+          }}
+        >
+          <Icons.trash style={{ width: 18, height: 18 }} />
+        </button>
+      )}
 
       {/* Caption */}
       <div className="absolute left-0 right-0 bottom-0 text-white" style={{ padding: '28px 30px' }}>
@@ -96,7 +100,7 @@ export function DesktopFeature({ recipe, description }: { recipe: Recipe; descri
   )
 }
 
-export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; description?: string }) {
+export function DesktopRecipeWide({ recipe, description, disableActions }: { recipe: Recipe; description?: string; disableActions?: boolean }) {
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
     if (!window.confirm(`Удалить «${recipe.title}»?`)) return
@@ -150,19 +154,21 @@ export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; des
               : <Icons.lock style={{ width: 11, height: 11 }} />
             }
           </span>
-          <button
-            onClick={handleDelete}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
-            style={{ color: 'var(--ink-soft)', border: '1px solid var(--rule-2)' }}>
-            <Icons.trash />
-          </button>
+          {!disableActions && (
+            <button
+              onClick={handleDelete}
+              className="w-8 h-8 rounded-full flex items-center justify-center"
+              style={{ color: 'var(--ink-soft)', border: '1px solid var(--rule-2)' }}>
+              <Icons.trash />
+            </button>
+          )}
         </div>
       </div>
     </Link>
   )
 }
 
-export function DesktopCard({ recipe }: { recipe: Recipe }) {
+export function DesktopCard({ recipe, disableActions }: { recipe: Recipe; disableActions?: boolean }) {
   async function handleDelete(e: React.MouseEvent) {
     e.preventDefault()
     if (!window.confirm(`Удалить «${recipe.title}»?`)) return
@@ -175,31 +181,35 @@ export function DesktopCard({ recipe }: { recipe: Recipe }) {
         <div className="relative rounded-[14px] overflow-hidden" style={{ aspectRatio: '4/5', background: '#e9dfcd' }}>
           <FoodImg src={recipe.imageUrl} tone={recipe.imageTone} fill />
           {/* Fav */}
-          <button
-            onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
-            className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(251,247,239,0.88)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(31,26,20,0.06)',
-              color: recipe.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)',
-            }}
-          >
-            {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
-          </button>
+          {!disableActions && (
+            <button
+              onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
+              className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(251,247,239,0.88)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(31,26,20,0.06)',
+                color: recipe.isFavorite ? 'var(--terracotta)' : 'var(--ink-muted)',
+              }}
+            >
+              {recipe.isFavorite ? <Icons.heartF /> : <Icons.heart />}
+            </button>
+          )}
           {/* Delete */}
-          <button
-            onClick={handleDelete}
-            className="absolute top-2.5 left-2.5 w-8 h-8 rounded-full flex items-center justify-center"
-            style={{
-              background: 'rgba(251,247,239,0.88)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(31,26,20,0.06)',
-              color: 'var(--ink-muted)',
-            }}
-          >
-            <Icons.trash />
-          </button>
+          {!disableActions && (
+            <button
+              onClick={handleDelete}
+              className="absolute top-2.5 left-2.5 w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                background: 'rgba(251,247,239,0.88)',
+                backdropFilter: 'blur(10px)',
+                border: '1px solid rgba(31,26,20,0.06)',
+                color: 'var(--ink-muted)',
+              }}
+            >
+              <Icons.trash />
+            </button>
+          )}
           {/* Time */}
           <div className="absolute left-2.5 bottom-2.5">
             <span className="inline-flex items-center gap-1 h-6 px-2.5 rounded-full text-[11px] font-semibold"
