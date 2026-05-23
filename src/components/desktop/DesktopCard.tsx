@@ -24,6 +24,25 @@ export function DesktopFeature({ recipe, description }: { recipe: Recipe; descri
         <span className="chip dark">Editor&apos;s pick</span>
       </div>
 
+      {/* Visibility badge */}
+      <div className="absolute top-[18px] left-[68px]">
+        <span
+          className="inline-flex items-center justify-center w-[34px] h-[34px] rounded-full"
+          style={{
+            background: recipe.isPublic ? 'rgba(184,84,63,0.85)' : 'rgba(0,0,0,0.32)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255,255,255,0.18)',
+            color: '#fff',
+          }}
+          title={recipe.isPublic ? 'Public' : 'Private'}
+        >
+          {recipe.isPublic
+            ? <Icons.share style={{ width: 14, height: 14 }} />
+            : <Icons.lock style={{ width: 14, height: 14 }} />
+          }
+        </span>
+      </div>
+
       {/* Fav button */}
       <button
         onClick={async (e) => { e.preventDefault(); await toggleFavorite(recipe.id) }}
@@ -118,6 +137,19 @@ export function DesktopRecipeWide({ recipe, description }: { recipe: Recipe; des
             <span>·</span>
             <span>{recipe.difficulty}</span>
           </div>
+          <span
+            className="inline-flex items-center justify-center w-6 h-6 rounded-full"
+            style={{
+              background: recipe.isPublic ? 'rgba(184,84,63,0.12)' : 'rgba(31,26,20,0.08)',
+              color: recipe.isPublic ? 'var(--terracotta)' : 'var(--ink-soft)',
+            }}
+            title={recipe.isPublic ? 'Public' : 'Private'}
+          >
+            {recipe.isPublic
+              ? <Icons.share style={{ width: 11, height: 11 }} />
+              : <Icons.lock style={{ width: 11, height: 11 }} />
+            }
+          </span>
           <button
             onClick={handleDelete}
             className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -173,6 +205,24 @@ export function DesktopCard({ recipe }: { recipe: Recipe }) {
             <span className="inline-flex items-center gap-1 h-6 px-2.5 rounded-full text-[11px] font-semibold"
               style={{ background: 'rgba(31,26,20,0.7)', color: '#FBF7EF', backdropFilter: 'blur(8px)' }}>
               <Icons.clock /> {recipe.cookTime}m
+            </span>
+          </div>
+
+          {/* Visibility badge */}
+          <div className="absolute right-2.5 bottom-2.5">
+            <span
+              className="inline-flex items-center justify-center w-6 h-6 rounded-full"
+              style={{
+                background: recipe.isPublic ? 'var(--terracotta)' : 'rgba(31,26,20,0.55)',
+                backdropFilter: 'blur(8px)',
+                color: '#FBF7EF',
+              }}
+              title={recipe.isPublic ? 'Public' : 'Private'}
+            >
+              {recipe.isPublic
+                ? <Icons.share style={{ width: 11, height: 11 }} />
+                : <Icons.lock style={{ width: 11, height: 11 }} />
+              }
             </span>
           </div>
         </div>
