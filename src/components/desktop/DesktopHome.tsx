@@ -10,13 +10,16 @@ import { toggleFavorite, deleteRecipe, deleteAllRecipes } from '@/actions/recipe
 import type { RecipeListItem } from '@/actions/recipes'
 
 const FILTERS = ['All', 'Quick', 'Vegetarian', 'Sweet', 'Sunday'] as const
+const VISIBILITY_FILTERS = ['Public', 'Private'] as const
 
 interface Props {
   recipes: RecipeListItem[]
   title?: string
+  showVisibilityFilter?: boolean
+  disableActions?: boolean
 }
 
-export default function DesktopHome({ recipes, title }: Props) {
+export default function DesktopHome({ recipes, title, showVisibilityFilter, disableActions }: Props) {
   const { userId } = useAuth()
   const [filter, setFilter] = useState<string>('All')
   const [q, setQ] = useState('')
@@ -27,6 +30,8 @@ export default function DesktopHome({ recipes, title }: Props) {
     if (filter === 'Vegetarian' && !r.tags.includes('Vegetarian')) return false
     if (filter === 'Sweet' && !r.tags.includes('Dessert')) return false
     if (filter === 'Sunday' && !r.tags.includes('Sunday')) return false
+    if (filter === 'Public' && !r.isPublic) return false
+    if (filter === 'Private' && r.isPublic) return false
     if (q && !r.title.toLowerCase().includes(q.toLowerCase())) return false
     return true
   })
@@ -129,7 +134,7 @@ export default function DesktopHome({ recipes, title }: Props) {
         <div className="flex items-center justify-between mb-[18px]">
           <h2 className="font-serif m-0 text-[28px] font-medium">{title ?? 'From your cookbook'}</h2>
           <div className="flex items-center gap-2.5">
-            {userId && recipes.length > 0 && (
+            {userId && !disableActions && recipes.length > 0 && (
               <button
                 onClick={async () => {
                   if (!window.confirm(`Удалить все ${recipes.length} рецепт(ов)? Это действие необратимо.`)) return
@@ -142,6 +147,20 @@ export default function DesktopHome({ recipes, title }: Props) {
             )}
             <div className="flex gap-1.5">
               {FILTERS.map((f) => {
+                const on = filter === f
+                return (
+                  <button key={f} onClick={() => setFilter(f)}
+                    className="h-8 px-3.5 rounded-full text-[12.5px] font-semibold"
+                    style={{
+                      background: on ? 'var(--ink)' : 'transparent',
+                      color: on ? 'var(--surface)' : 'var(--ink-2)',
+                      border: on ? 'none' : '1px solid var(--rule-2)',
+                    }}>
+                    {f}
+                  </button>
+                )
+              })}
+              {showVisibilityFilter && VISIBILITY_FILTERS.map((f) => {
                 const on = filter === f
                 return (
                   <button key={f} onClick={() => setFilter(f)}
@@ -205,7 +224,7 @@ export default function DesktopHome({ recipes, title }: Props) {
                     {r.tags[0] && <><span>·</span><span>{r.tags[0]}</span></>}
                   </div>
                 </div>
-                {userId && (
+                {userId && !disableActions && (
                   <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
                       onClick={async (e) => { e.preventDefault(); await toggleFavorite(r.id) }}
